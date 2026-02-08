@@ -390,7 +390,7 @@ export default function HeroSection() {
           className="hero-stats flex items-center justify-center gap-12 text-sm text-gray-600"
         >
           {[
-            { value: '10+', label: 'Projects Completed' },
+            { value: '20+', label: 'Projects Completed' },
             { value: '2+', label: 'Years Experience' },
             { value: '50+', label: 'Students Guided' },
           ].map((stat, index) => (

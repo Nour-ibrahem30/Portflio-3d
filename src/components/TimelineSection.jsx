@@ -32,7 +32,7 @@ const experiences = [
     company: 'Remote',
     location: 'Remote',
     period: '2024 – Present',
-    description: 'Built 10+ responsive websites using semantic HTML, SCSS, JavaScript, and React. Developed interactive, user-friendly interfaces with a focus on performance and usability.',
+    description: 'Built 20+ responsive websites using semantic HTML, SCSS, JavaScript, and React. Developed interactive, user-friendly interfaces with a focus on performance and usability.',
     skills: ['HTML5', 'SCSS', 'JavaScript', 'React', 'Mobile-First'],
     type: 'work'
   },

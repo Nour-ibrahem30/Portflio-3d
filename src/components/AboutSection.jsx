@@ -192,7 +192,7 @@ export default function AboutSection() {
           >
             {[
               { label: 'EXPERIENCE', value: '2+ Years', icon: '💼', color: 'from-blue-500 to-cyan-500' },
-              { label: 'PROJECTS', value: '10+ Websites', icon: '🚀', color: 'from-purple-500 to-pink-500' },
+              { label: 'PROJECTS', value: '20+ Websites', icon: '🚀', color: 'from-purple-500 to-pink-500' },
               { label: 'EDUCATION', value: 'GPA 3.0/4.0', icon: '🎓', color: 'from-green-500 to-emerald-500' },
             ].map((stat, index) => (
               <motion.div
