@@ -9,7 +9,7 @@ export default function AboutSection() {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const isInView = useInView(sectionRef, { once: false, margin: "-100px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]

@@ -73,7 +73,6 @@ export default function SkillsSection() {
   useEffect(() => {
     const variant = Math.floor(Math.random() * cardVariants.length);
     setAnimationVariant(variant);
-    console.log('🎨 Skills Animation Variant:', variant);
   }, []);
 
   return (
@@ -110,7 +109,7 @@ export default function SkillsSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="mb-20"
         >
@@ -126,7 +125,7 @@ export default function SkillsSection() {
           <motion.div
             initial={{ width: 0 }}
             whileInView={{ width: '200px' }}
-            viewport={{ once: false }}
+            viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.3 }}
             className="h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-4"
           />
@@ -139,7 +138,7 @@ export default function SkillsSection() {
               custom={categoryIndex}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false }}
+              viewport={{ once: true }}
               variants={cardVariants[animationVariant]}
               whileHover={{ y: -10, scale: 1.02 }}
               className="relative group"
@@ -180,7 +179,7 @@ export default function SkillsSection() {
                           <motion.div
                             initial={{ width: 0 }}
                             whileInView={{ width: `${skill.level}%` }}
-                            viewport={{ once: false }}
+                            viewport={{ once: true }}
                             transition={{ 
                               delay: categoryIndex * 0.15 + skillIndex * 0.08,
                               duration: 0.8,

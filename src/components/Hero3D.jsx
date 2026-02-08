@@ -155,7 +155,6 @@ export default function Hero3D() {
     const handleMouseMove = (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
       const y = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMousePosition({ x, y });
       mouseX.set(x * 50);
       mouseY.set(y * 50);
     };
@@ -230,15 +229,15 @@ export default function Hero3D() {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto">
-        {/* Badge */}
+        {/* Badge - Moved Down */}
         <motion.div
-          className="hero-badge inline-block mb-8"
+          className="hero-badge inline-block mb-6"
           whileHover={{ scale: 1.05 }}
         >
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-            <div className="relative px-8 py-3 bg-zinc-900 border border-purple-500/50 rounded-full backdrop-blur-xl shadow-2xl">
-              <div className="flex items-center gap-3">
+            <div className="relative px-6 py-2.5 bg-zinc-900 border border-purple-500/50 rounded-full backdrop-blur-xl shadow-2xl">
+              <div className="flex items-center gap-2.5">
                 <motion.div
                   animate={{
                     scale: [1, 1.2, 1],
@@ -250,7 +249,7 @@ export default function Hero3D() {
                   }}
                   className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50"
                 />
-                <span className="text-white text-sm font-semibold uppercase tracking-wider">
+                <span className="text-white text-xs font-semibold uppercase tracking-wider">
                   Available for Work
                 </span>
               </div>

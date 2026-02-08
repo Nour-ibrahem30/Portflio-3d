@@ -110,7 +110,6 @@ export default function TimelineSection() {
 
   useEffect(() => {
     setAnimationVariant(0); // Always use Slide from Sides (original)
-    console.log('🎨 Timeline Animation Variant: 0 (Slide from Sides)');
   }, []);
 
   return (
@@ -147,7 +146,7 @@ export default function TimelineSection() {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
           className="mb-20"
         >
@@ -163,7 +162,7 @@ export default function TimelineSection() {
           <motion.div
             initial={{ width: 0 }}
             whileInView={{ width: '200px' }}
-            viewport={{ once: false }}
+            viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.3 }}
             className="h-1 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mt-4"
           />
@@ -180,7 +179,7 @@ export default function TimelineSection() {
                 key={`${exp.company}-${index}`}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: false }}
+                viewport={{ once: true }}
                 variants={timelineVariants[animationVariant](index)}
                 className={`relative flex items-center ${
                   index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'

@@ -96,6 +96,34 @@ function App() {
         transition={{ duration: 0.5 }}
         className="relative min-h-screen bg-black text-white overflow-x-hidden"
       >
+        {/* Version Badge */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 1.5 }}
+          className="fixed top-20 left-6 z-50"
+        >
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
+            <div className="relative px-4 py-2 bg-zinc-900 border border-purple-500/50 rounded-full backdrop-blur-xl shadow-lg flex items-center gap-2">
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                }}
+                className="w-2 h-2 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
+              />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                Beta v0.1
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Custom Cursor - Optimized */}
         <motion.div
           className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
@@ -185,6 +213,9 @@ function App() {
             
             <p className="text-gray-600 uppercase tracking-widest text-sm">
               © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
+            </p>
+            <p className="text-gray-700 text-xs mt-2">
+              Beta Version 0.1 — Work in Progress
             </p>
           </div>
         </footer>

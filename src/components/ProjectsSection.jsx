@@ -9,21 +9,221 @@ export default function ProjectsSection() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [displayCount, setDisplayCount] = useState(6); // Show 6 initially
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
-  const isInView = useInView(sectionRef, { once: false, margin: "-100px" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  // Fallback projects in case GitHub API fails
+  const fallbackProjects = [
+    {
+      id: 1,
+      name: 'Portfolio Website',
+      description: 'Personal portfolio website built with React, Vite, and Tailwind CSS',
+      html_url: 'https://github.com/Nour-ibrahem30',
+      language: 'JavaScript',
+      stargazers_count: 0,
+      forks_count: 0,
+      projectImage: 'https://opengraph.githubassets.com/1/Nour-ibrahem30/Portflio-3d',
+      readme: 'Personal portfolio website showcasing my projects and skills as a Front-End Developer.'
+    }
+  ];
 
   useEffect(() => {
-    fetch('https://api.github.com/users/Nour-ibrahem30/repos?sort=updated&per_page=6')
-      .then(res => res.json())
-      .then(data => {
-        setProjects(data);
+    const fetchProjects = async () => {
+      try {
+        console.log('🔄 Fetching projects from GitHub...');
+        // Fetch all repos (GitHub API returns max 100 per page)
+        const headers = {
+          'Accept': 'application/vnd.github.v3+json'
+        };
+        
+        // Add GitHub token if available (for higher rate limits)
+        const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+        if (githubToken) {
+          headers['Authorization'] = `token ${githubToken}`;
+          console.log('✅ Using GitHub Token');
+        } else {
+          console.warn('⚠️ No GitHub Token found. Rate limit: 60 requests/hour');
+        }
+        
+        const reposResponse = await fetch('https://api.github.com/users/Nour-ibrahem30/repos?sort=updated&per_page=100', {
+          headers
+        });
+        
+        if (!reposResponse.ok) {
+          const errorText = await reposResponse.text();
+          console.error('❌ GitHub API Error:', reposResponse.status, errorText);
+          throw new Error(`GitHub API error: ${reposResponse.status}`);
+        }
+        
+        const repos = await reposResponse.json();
+        console.log(`✅ Fetched ${repos.length} repositories`);
+        
+        // Filter out forked repos if you want only your own projects
+        const ownRepos = repos.filter(repo => !repo.fork);
+        console.log(`✅ Filtered to ${ownRepos.length} own repositories`);
+        
+        // Fetch README and images for each repo
+        const projectsWithReadme = await Promise.all(
+          ownRepos.map(async (repo) => {
+            let description = repo.description || 'No description available';
+            let projectImage = null;
+            
+            // Priority 1: Check if project has GitHub Pages with live site
+            if (repo.has_pages || (repo.homepage && repo.homepage.includes('github.io'))) {
+              // For GitHub Pages, we'll still check README for images first
+              // as they usually have better screenshots than auto-generated ones
+            }
+            
+            try {
+              // Try to fetch README first (for both description and images)
+              const readmeResponse = await fetch(`https://api.github.com/repos/Nour-ibrahem30/${repo.name}/readme`, {
+                headers
+              });
+              
+              if (readmeResponse.ok) {
+                const readmeData = await readmeResponse.json();
+                
+                // Decode base64 with UTF-8 support for Arabic
+                const binaryString = atob(readmeData.content);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i);
+                }
+                const readmeContent = new TextDecoder('utf-8').decode(bytes);
+                
+                // Extract meaningful content from README
+                const lines = readmeContent.split('\n');
+                let meaningfulText = '';
+                
+                for (const line of lines) {
+                  const trimmed = line.trim();
+                  // Skip headers, images, badges, empty lines, code blocks
+                  if (trimmed && 
+                      !trimmed.startsWith('#') && 
+                      !trimmed.startsWith('!') &&
+                      !trimmed.startsWith('[!') &&
+                      !trimmed.startsWith('[![') &&
+                      !trimmed.startsWith('```') &&
+                      !trimmed.startsWith('---') &&
+                      !trimmed.startsWith('|') &&
+                      !trimmed.startsWith('>') &&
+                      trimmed.length > 20) {
+                    meaningfulText += trimmed + ' ';
+                    if (meaningfulText.length > 150) break;
+                  }
+                }
+                
+                if (meaningfulText.length > 20) {
+                  description = meaningfulText.substring(0, 150).trim() + '...';
+                }
+                
+                // Try to find images in README
+                const imageRegex = /!\[.*?\]\((.*?)\)/g;
+                const images = [...readmeContent.matchAll(imageRegex)];
+                if (images.length > 0) {
+                  let imgUrl = images[0][1];
+                  // Convert relative URLs to absolute
+                  if (!imgUrl.startsWith('http')) {
+                    imgUrl = `https://raw.githubusercontent.com/Nour-ibrahem30/${repo.name}/${repo.default_branch}/${imgUrl}`;
+                  }
+                  projectImage = imgUrl;
+                }
+                
+                // Also check for HTML img tags in README
+                if (!projectImage) {
+                  const htmlImageRegex = /<img[^>]+src=["']([^"']+)["']/g;
+                  const htmlImages = [...readmeContent.matchAll(htmlImageRegex)];
+                  if (htmlImages.length > 0) {
+                    let imgUrl = htmlImages[0][1];
+                    if (!imgUrl.startsWith('http')) {
+                      imgUrl = `https://raw.githubusercontent.com/Nour-ibrahem30/${repo.name}/${repo.default_branch}/${imgUrl}`;
+                    }
+                    projectImage = imgUrl;
+                  }
+                }
+              }
+              
+              // If no image found in README, try to find screenshot in repo
+              if (!projectImage) {
+                try {
+                  const contentsResponse = await fetch(`https://api.github.com/repos/Nour-ibrahem30/${repo.name}/contents`, {
+                    headers
+                  });
+                  if (contentsResponse.ok) {
+                    const contents = await contentsResponse.json();
+                    
+                    // Look for common screenshot filenames in root
+                    const screenshotFile = contents.find(file => 
+                      /screenshot|preview|demo|thumbnail|cover|banner/i.test(file.name) && 
+                      /\.(png|jpg|jpeg|gif|webp)$/i.test(file.name)
+                    );
+                    
+                    if (screenshotFile) {
+                      projectImage = screenshotFile.download_url;
+                    } else {
+                      // Check in common folders
+                      const imagesFolders = contents.filter(item => 
+                        item.type === 'dir' && 
+                        /images?|assets?|screenshots?|public|static/i.test(item.name)
+                      );
+                      
+                      for (const folder of imagesFolders) {
+                        try {
+                          const folderResponse = await fetch(folder.url, { headers });
+                          if (folderResponse.ok) {
+                            const folderContents = await folderResponse.json();
+                            const imageFile = folderContents.find(file => 
+                              /screenshot|preview|demo|thumbnail|cover|banner|hero/i.test(file.name) && 
+                              /\.(png|jpg|jpeg|gif|webp)$/i.test(file.name)
+                            );
+                            if (imageFile) {
+                              projectImage = imageFile.download_url;
+                              break;
+                            }
+                          }
+                        } catch (err) {
+                          console.log(`Could not check folder ${folder.name}`);
+                        }
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.log(`No screenshot found in ${repo.name}`);
+                }
+              }
+              
+              // If still no image, use OpenGraph as fallback (not production URL)
+              if (!projectImage) {
+                projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+              }
+              
+            } catch (error) {
+              console.log(`Could not fetch data for ${repo.name}:`, error);
+            }
+            
+            return {
+              ...repo,
+              readme: description,
+              projectImage: projectImage
+            };
+          })
+        );
+        
+        setProjects(projectsWithReadme);
+        console.log(`✅ Successfully loaded ${projectsWithReadme.length} projects`);
         setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching projects:', err);
+      } catch (err) {
+        console.error('❌ Error fetching projects:', err);
+        console.log('⚠️ Using fallback projects');
+        // Set fallback projects if API fails
+        setProjects(fallbackProjects);
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProjects();
   }, []);
 
   useEffect(() => {
@@ -108,9 +308,41 @@ export default function ProjectsSection() {
               <div className="absolute inset-0 border-4 border-transparent border-t-purple-500 rounded-full"></div>
             </motion.div>
           </div>
+        ) : projects.length === 0 ? (
+          <div className="flex flex-col justify-center items-center h-96 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-md"
+            >
+              <div className="text-6xl mb-6">😕</div>
+              <h3 className="text-2xl font-bold text-white mb-4">No Projects Found</h3>
+              <p className="text-gray-400 mb-6">
+                Unable to fetch projects from GitHub. This might be due to API rate limits.
+              </p>
+              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                <p className="text-yellow-400 text-sm">
+                  💡 <strong>Tip:</strong> Add a GitHub Token in <code className="bg-black/30 px-2 py-1 rounded">.env</code> file to increase rate limits from 60 to 5000 requests/hour.
+                </p>
+              </div>
+            </motion.div>
+          </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
+          <>
+            {/* Projects count */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <p className="text-gray-400 text-lg">
+                Showing <span className="text-purple-400 font-bold">{Math.min(displayCount, projects.length)}</span> of <span className="text-purple-400 font-bold">{projects.length}</span> projects
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {projects.slice(0, displayCount).map((project, index) => (
               <motion.div
                 key={project.id}
                 initial={{ opacity: 0, y: 50 }}
@@ -121,51 +353,29 @@ export default function ProjectsSection() {
                 whileHover={{ y: -10 }}
                 className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-purple-500/50 transition-all duration-300 shadow-xl"
               >
-                {/* Image placeholder with gradient */}
-                <div className="relative h-64 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20"></div>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-purple-600/40 via-pink-600/40 to-blue-600/40"
-                    animate={{ 
-                      scale: hoveredIndex === index ? 1.3 : 1,
-                      rotate: hoveredIndex === index ? 10 : 0
-                    }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                  />
+                {/* Project Image */}
+                <div className="relative h-64 overflow-hidden bg-zinc-800">
+                  <div className="absolute inset-0">
+                    <img 
+                      src={project.projectImage}
+                      alt={project.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Fallback to OpenGraph if image fails
+                        e.target.src = `https://opengraph.githubassets.com/1/${project.full_name}`;
+                      }}
+                    />
+                  </div>
                   
-                  {/* Animated particles on hover */}
-                  {hoveredIndex === index && (
-                    <div className="absolute inset-0">
-                      {[...Array(10)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="absolute w-1 h-1 bg-white rounded-full"
-                          style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                          }}
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ 
-                            opacity: [0, 1, 0],
-                            scale: [0, 1.5, 0],
-                            y: [0, -50]
-                          }}
-                          transition={{
-                            duration: 1,
-                            delay: i * 0.1,
-                            repeat: Infinity
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  {/* Overlay gradient on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                   
                   {/* Project number */}
                   <motion.div 
-                    className="absolute top-6 left-6 text-8xl font-bold text-white/5"
+                    className="absolute top-6 left-6 text-8xl font-bold text-white/10"
                     animate={{ 
-                      scale: hoveredIndex === index ? 1.3 : 1,
-                      x: hoveredIndex === index ? 15 : 0,
+                      scale: hoveredIndex === index ? 1.2 : 1,
                       y: hoveredIndex === index ? -10 : 0
                     }}
                     transition={{ duration: 0.4 }}
@@ -225,8 +435,8 @@ export default function ProjectsSection() {
                     </motion.div>
                   </div>
 
-                  <p className="text-gray-400 mb-4 line-clamp-2 text-sm">
-                    {project.description || 'A creative project showcasing modern web development'}
+                  <p className="text-gray-400 mb-4 line-clamp-3 text-sm leading-relaxed">
+                    {project.readme}
                   </p>
 
                   <div className="flex items-center gap-6 text-sm text-gray-500 mb-4">
@@ -290,6 +500,57 @@ export default function ProjectsSection() {
               </motion.div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {displayCount < projects.length && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex justify-center mt-16"
+            >
+              <motion.button
+                onClick={() => setDisplayCount(prev => Math.min(prev + 6, projects.length))}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="group relative px-10 py-5 overflow-hidden rounded-full"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10 flex items-center gap-3 text-white font-semibold uppercase tracking-wider">
+                  <span>Load More Projects</span>
+                  <motion.svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </motion.svg>
+                </div>
+              </motion.button>
+            </motion.div>
+          )}
+
+          {/* Show All Button (when some are hidden) */}
+          {displayCount < projects.length && displayCount + 6 < projects.length && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex justify-center mt-6"
+            >
+              <button
+                onClick={() => setDisplayCount(projects.length)}
+                className="text-gray-500 hover:text-purple-400 transition-colors text-sm uppercase tracking-wider"
+              >
+                or Show All ({projects.length} projects)
+              </button>
+            </motion.div>
+          )}
+          </>
         )}
       </div>
     </section>
