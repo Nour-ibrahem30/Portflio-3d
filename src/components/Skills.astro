@@ -1,0 +1,81 @@
+---
+const skillCategories = [
+  {
+    title: 'Frontend',
+    icon: '🎨',
+    color: 'cyan',
+    skills: ['React', 'Vue.js', 'Next.js', 'Tailwind CSS', 'TypeScript', 'JavaScript']
+  },
+  {
+    title: 'Backend',
+    icon: '⚙️',
+    color: 'purple',
+    skills: ['Node.js', 'Express', 'MongoDB', 'PostgreSQL', 'REST API', 'GraphQL']
+  },
+  {
+    title: 'Tools',
+    icon: '🛠️',
+    color: 'pink',
+    skills: ['Git', 'GitHub', 'Docker', 'VS Code', 'Webpack', 'Vite']
+  },
+  {
+    title: 'Design',
+    icon: '✨',
+    color: 'yellow',
+    skills: ['Figma', 'Adobe XD', 'UI/UX', 'Responsive Design', 'Animation', 'Prototyping']
+  }
+];
+---
+
+<section id="skills" class="min-h-screen py-20 px-6 relative">
+  <div class="container mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-6xl font-black mb-4 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        المهارات
+      </h2>
+      <p class="text-xl text-gray-400">
+        التقنيات والأدوات التي أستخدمها
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {skillCategories.map((category, index) => (
+        <div 
+          class={`skill-category p-8 rounded-2xl bg-gradient-to-br from-${category.color}-500/10 to-transparent border border-${category.color}-500/30 backdrop-blur-sm hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-${category.color}-500/20`}
+          style={`animation-delay: ${index * 0.1}s`}
+        >
+          <div class="text-6xl mb-4">{category.icon}</div>
+          <h3 class={`text-2xl font-bold mb-6 text-${category.color}-400`}>
+            {category.title}
+          </h3>
+          <ul class="space-y-3">
+            {category.skills.map(skill => (
+              <li class="flex items-center gap-3 text-gray-300">
+                <span class={`w-2 h-2 rounded-full bg-${category.color}-400`}></span>
+                <span>{skill}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .skill-category {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

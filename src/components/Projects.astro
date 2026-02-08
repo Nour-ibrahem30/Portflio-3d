@@ -1,0 +1,117 @@
+---
+const projects = [
+  {
+    title: 'متجر إلكتروني ثلاثي الأبعاد',
+    description: 'منصة تسوق تفاعلية مع عرض المنتجات بتقنية 3D وتجربة مستخدم استثنائية',
+    tech: ['Three.js', 'React', 'Node.js', 'MongoDB'],
+    color: 'primary',
+    icon: '🛍️'
+  },
+  {
+    title: 'لعبة ويب تفاعلية',
+    description: 'لعبة مغامرات ثلاثية الأبعاد تعمل على المتصفح مع فيزياء واقعية',
+    tech: ['Three.js', 'WebGL', 'Cannon.js', 'TypeScript'],
+    color: 'secondary',
+    icon: '🎮'
+  },
+  {
+    title: 'تطبيق إدارة مشاريع',
+    description: 'نظام شامل لإدارة المشاريع والفرق مع لوحة تحكم تفاعلية',
+    tech: ['React', 'Express', 'PostgreSQL', 'Socket.io'],
+    color: 'accent',
+    icon: '📊'
+  },
+  {
+    title: 'معرض فني افتراضي',
+    description: 'متحف افتراضي ثلاثي الأبعاد لعرض الأعمال الفنية بطريقة تفاعلية',
+    tech: ['Three.js', 'Astro', 'GSAP', 'WebGL'],
+    color: 'purple-500',
+    icon: '🎨'
+  },
+  {
+    title: 'منصة تعليمية تفاعلية',
+    description: 'موقع تعليمي مع محاكاة ثلاثية الأبعاد للمفاهيم العلمية',
+    tech: ['React', 'Three.js', 'Firebase', 'Tailwind'],
+    color: 'primary',
+    icon: '📚'
+  },
+  {
+    title: 'لوحة تحكم تحليلية',
+    description: 'Dashboard متقدم مع رسوم بيانية ثلاثية الأبعاد وتحليلات فورية',
+    tech: ['Vue.js', 'D3.js', 'Three.js', 'GraphQL'],
+    color: 'secondary',
+    icon: '📈'
+  }
+];
+---
+
+<section id="projects" class="min-h-screen flex items-center justify-center px-6 py-20">
+  <div class="container mx-auto">
+    <h2 class="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      المشاريع المميزة
+    </h2>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {projects.map((project, index) => (
+        <div 
+          class={`project-card group relative p-8 rounded-3xl bg-gradient-to-br from-${project.color}/10 to-transparent border border-${project.color}/20 backdrop-blur-sm hover:scale-105 transition-all duration-500 cursor-pointer overflow-hidden`}
+          style={`animation-delay: ${index * 0.1}s`}
+        >
+          <div class={`absolute inset-0 bg-gradient-to-br from-${project.color}/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+          
+          <div class="relative z-10">
+            <div class="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
+              {project.icon}
+            </div>
+            
+            <h3 class={`text-2xl font-bold mb-4 text-${project.color} group-hover:text-white transition-colors`}>
+              {project.title}
+            </h3>
+            
+            <p class="text-gray-300 mb-6 leading-relaxed">
+              {project.description}
+            </p>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+              {project.tech.map(tech => (
+                <span class={`px-3 py-1 text-sm rounded-full bg-${project.color}/20 text-${project.color} border border-${project.color}/30`}>
+                  {tech}
+                </span>
+              ))}
+            </div>
+            
+            <button class={`w-full py-3 rounded-xl bg-${project.color}/20 border border-${project.color}/30 text-${project.color} font-bold hover:bg-${project.color}/30 transition-all`}>
+              عرض المشروع ←
+            </button>
+          </div>
+          
+          <div class={`absolute -bottom-10 -right-10 w-40 h-40 bg-${project.color}/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500`}></div>
+        </div>
+      ))}
+    </div>
+    
+    <div class="text-center mt-12">
+      <a href="#contact" class="inline-block px-8 py-4 bg-gradient-to-r from-primary to-secondary rounded-full font-bold hover:scale-110 transition-transform shadow-lg hover:shadow-primary/50">
+        هل لديك مشروع؟ لنتحدث!
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .project-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import GitHubProjects from '../components/GitHubProjects.astro';
+import Skills from '../components/Skills.astro';
+import Contact from '../components/Contact.astro';
+
+const githubUsername = 'Nour-ibrahem30';
+---
+
+<Layout title="Nour Ibrahim - Portfolio">
+  <Hero />
+  <About />
+  <GitHubProjects username={githubUsername} />
+  <Skills />
+  <Contact />
+</Layout>
