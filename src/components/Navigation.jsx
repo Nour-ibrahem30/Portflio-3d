@@ -17,10 +17,8 @@ export default function Navigation({ activeSection }) {
     { id: 'home', label: 'Home', icon: '🏠' },
     { id: 'about', label: 'About', icon: '👤' },
     { id: 'skills', label: 'Skills', icon: '⚡' },
-    { id: 'experience', label: 'Experience', icon: '💼' },
     { id: 'projects', label: 'Projects', icon: '🚀' },
-    { id: 'blog', label: 'Blog', icon: '📝' },
-    { id: 'testimonials', label: 'Testimonials', icon: '💬' },
+    { id: 'experience', label: 'Experience', icon: '💼' },
     { id: 'contact', label: 'Contact', icon: '📧' },
   ];
 

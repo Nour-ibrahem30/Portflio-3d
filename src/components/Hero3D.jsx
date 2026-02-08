@@ -82,7 +82,7 @@ function HeroConstellation({ children }) {
       }
     }
 
-    const stars = Array.from({ length: 100 }, () => new Star());
+    const stars = Array.from({ length: 50 }, () => new Star());
 
     let animationId;
     function animate() {
@@ -143,9 +143,8 @@ export default function Hero3D() {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll();
   
-  const y = useTransform(scrollYProgress, [0, 1], [0, 500]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   // Smooth mouse tracking
   const springConfig = { stiffness: 150, damping: 15 };
@@ -203,7 +202,7 @@ export default function Hero3D() {
   return (
     <motion.section
       ref={heroRef}
-      style={{ y, opacity, scale }}
+      style={{ y, scale }}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
     >
       {/* Constellation Background Animation */}
@@ -414,7 +413,7 @@ export default function Hero3D() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2 }}
-          className="flex items-center justify-center gap-12 text-sm flex-wrap"
+          className="flex items-center justify-center gap-8 md:gap-12 flex-wrap mb-20"
         >
           {[
             { value: '20+', label: 'Projects' },
@@ -442,24 +441,27 @@ export default function Hero3D() {
           ))}
         </motion.div>
 
-        {/* Scroll Indicator */}
+        {/* Scroll Indicator - Attached */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2.5 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          <motion.div
+          <motion.a
+            href="#about"
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="flex flex-col items-center gap-2 text-gray-500"
+            className="flex flex-col items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors cursor-pointer"
           >
-            <span className="text-xs uppercase tracking-widest">Scroll</span>
+            <span className="text-xs uppercase tracking-widest font-semibold">Scroll Down</span>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
-          </motion.div>
+          </motion.a>
         </motion.div>
+
+
       </div>
 
       {/* Floating Elements */}

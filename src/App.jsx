@@ -19,16 +19,23 @@ function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Track mouse position for custom cursor
+  // Track mouse position for custom cursor - optimized
   useEffect(() => {
+    let rafId;
     const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+        rafId = null;
+      });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
-  const [useCustomCursor, setUseCustomCursor] = useState(false); // Custom cursor disabled by default
 
   useEffect(() => {
     // Smooth scroll
@@ -42,92 +49,36 @@ function App() {
       });
     });
 
-    // Track active section
+    // Track active section with throttle for better performance
+    let ticking = false;
     const handleScroll = () => {
-      const sections = ['home', 'about', 'skills', 'experience', 'projects', 'blog', 'testimonials', 'contact'];
-      const scrollPosition = window.scrollY + 200;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const sections = ['home', 'about', 'skills', 'projects', 'experience', 'contact'];
+          const scrollPosition = window.scrollY + 200;
 
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(section);
-            break;
+          for (const section of sections) {
+            const element = document.getElementById(section);
+            if (element) {
+              const { offsetTop, offsetHeight } = element;
+              if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+                setActiveSection(section);
+                break;
+              }
+            }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor (only if enabled)
-    let cursor, cursorFollower, animationFrame;
-    
-    if (useCustomCursor) {
-      cursor = document.createElement('div');
-      cursor.className = 'custom-cursor';
-      document.body.appendChild(cursor);
-
-      cursorFollower = document.createElement('div');
-      cursorFollower.className = 'custom-cursor-follower';
-      document.body.appendChild(cursorFollower);
-
-      let mouseX = 0, mouseY = 0;
-      let followerX = 0, followerY = 0;
-
-      const handleMouseMove = (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        cursor.style.left = mouseX + 'px';
-        cursor.style.top = mouseY + 'px';
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-
-      const animate = () => {
-        followerX += (mouseX - followerX) * 0.1;
-        followerY += (mouseY - followerY) * 0.1;
-        cursorFollower.style.left = followerX + 'px';
-        cursorFollower.style.top = followerY + 'px';
-        animationFrame = requestAnimationFrame(animate);
-      };
-      animate();
-
-      // Hover effects
-      const updateInteractiveElements = () => {
-        const interactiveElements = document.querySelectorAll('a, button');
-        interactiveElements.forEach(el => {
-          el.addEventListener('mouseenter', () => {
-            cursor.classList.add('cursor-hover');
-            cursorFollower.classList.add('cursor-hover');
-          });
-          el.addEventListener('mouseleave', () => {
-            cursor.classList.remove('cursor-hover');
-            cursorFollower.classList.remove('cursor-hover');
-          });
-        });
-      };
-
-      updateInteractiveElements();
-
-      const observer = new MutationObserver(updateInteractiveElements);
-      observer.observe(document.body, { childList: true, subtree: true });
-
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        document.removeEventListener('mousemove', handleMouseMove);
-        if (animationFrame) cancelAnimationFrame(animationFrame);
-        if (cursor) cursor.remove();
-        if (cursorFollower) cursorFollower.remove();
-        observer.disconnect();
-      };
-    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [useCustomCursor]);
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -145,52 +96,16 @@ function App() {
         transition={{ duration: 0.5 }}
         className="relative min-h-screen bg-black text-white overflow-x-hidden"
       >
-        {/* Custom Cursor - Global */}
+        {/* Custom Cursor - Optimized */}
         <motion.div
-          className="fixed w-8 h-8 pointer-events-none z-[9999] mix-blend-difference"
-          animate={{
-            x: mousePosition.x - 16,
-            y: mousePosition.y - 16,
-          }}
-          transition={{
-            type: "spring",
-            damping: 30,
-            stiffness: 200,
-            mass: 0.5
+          className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
+          style={{
+            left: mousePosition.x - 12,
+            top: mousePosition.y - 12,
           }}
         >
-          {/* Outer ring */}
-          <motion.div
-            className="absolute inset-0 border-2 border-purple-400 rounded-full"
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          {/* Inner dot */}
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full" />
-        </motion.div>
-
-        {/* Cursor Follower */}
-        <motion.div
-          className="fixed w-12 h-12 pointer-events-none z-[9998]"
-          animate={{
-            x: mousePosition.x - 24,
-            y: mousePosition.y - 24,
-          }}
-          transition={{
-            type: "spring",
-            damping: 20,
-            stiffness: 100,
-            mass: 0.8
-          }}
-        >
-          <div className="w-full h-full border border-pink-400/30 rounded-full" />
+          <div className="absolute inset-0 border-2 border-purple-400 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full" />
         </motion.div>
 
         {/* Navigation */}
@@ -221,10 +136,8 @@ function App() {
           </div>
           <AboutSection />
           <SkillsSection />
-          <TimelineSection />
           <ProjectsSection />
-          <BlogSection />
-          <TestimonialsSection />
+          <TimelineSection />
           <ContactSection />
         </main>
 

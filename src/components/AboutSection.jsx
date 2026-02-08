@@ -16,7 +16,6 @@ export default function AboutSection() {
   });
 
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
 
   useEffect(() => {
     if (isInView && titleRef.current) {
