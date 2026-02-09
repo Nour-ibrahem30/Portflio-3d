@@ -113,7 +113,7 @@ export default function TimelineSection() {
   }, []);
 
   return (
-    <section id="experience" className="relative min-h-screen py-32 px-6 md:px-12 bg-black overflow-hidden">
+    <section id="experience" className="relative min-h-screen py-32 px-6 md:px-12 bg-black w-full">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <motion.div

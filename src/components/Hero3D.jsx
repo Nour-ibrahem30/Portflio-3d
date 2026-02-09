@@ -33,8 +33,8 @@ function HeroConstellation({ children }) {
         this.baseY = this.y;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 3 + 1;
-        this.pushRadius = 150; // Distance to push away from mouse
+        this.size = Math.random() * 2 + 0.5;
+        this.pushRadius = 100; // Reduced push radius
       }
 
       update() {
@@ -43,11 +43,11 @@ function HeroConstellation({ children }) {
         const dy = mouseRef.current.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Push away from mouse
+        // Gentle push away from mouse
         if (distance < this.pushRadius) {
           const force = (this.pushRadius - distance) / this.pushRadius;
-          const pushX = (dx / distance) * force * 10;
-          const pushY = (dy / distance) * force * 10;
+          const pushX = (dx / distance) * force * 5; // Reduced force
+          const pushY = (dy / distance) * force * 5;
           
           this.x -= pushX;
           this.y -= pushY;
@@ -71,8 +71,8 @@ function HeroConstellation({ children }) {
       }
 
       draw() {
-        // Draw star with glow
-        ctx.shadowBlur = 10;
+        // Draw star with subtle glow
+        ctx.shadowBlur = 5;
         ctx.shadowColor = '#fff';
         ctx.fillStyle = '#fff';
         ctx.beginPath();
@@ -82,27 +82,46 @@ function HeroConstellation({ children }) {
       }
     }
 
-    const stars = Array.from({ length: 50 }, () => new Star());
+    const stars = Array.from({ length: 80 }, () => new Star()); // زودت العدد لـ 80
 
     let animationId;
-    function animate() {
+    let lastTime = 0;
+    const fps = 60;
+    const frameDelay = 1000 / fps;
+    
+    function animate(currentTime) {
+      // Throttle to 60fps max
+      const deltaTime = currentTime - lastTime;
+      
+      if (deltaTime < frameDelay) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      
+      lastTime = currentTime - (deltaTime % frameDelay);
+      
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Update and draw stars
       stars.forEach(star => {
         star.update();
         star.draw();
       });
 
-      // Draw connections
+      // Draw connections (optimized - only check nearby stars)
+      const connectionDistance = 150;
       stars.forEach((star1, i) => {
-        stars.slice(i + 1).forEach(star2 => {
+        // Only check next few stars to reduce calculations
+        const checkLimit = Math.min(i + 10, stars.length);
+        for (let j = i + 1; j < checkLimit; j++) {
+          const star2 = stars[j];
           const dx = star1.x - star2.x;
           const dy = star1.y - star2.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 150) {
-            const opacity = 1 - distance / 150;
+          if (distance < connectionDistance) {
+            const opacity = (1 - distance / connectionDistance) * 0.3;
             ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -110,7 +129,7 @@ function HeroConstellation({ children }) {
             ctx.lineTo(star2.x, star2.y);
             ctx.stroke();
           }
-        });
+        }
       });
 
       animationId = requestAnimationFrame(animate);
@@ -202,7 +221,7 @@ export default function Hero3D() {
     <motion.section
       ref={heroRef}
       style={{ y, scale }}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
+      className="relative min-h-screen flex items-center justify-center w-full bg-black"
     >
       {/* Constellation Background Animation */}
       <div className="absolute inset-0 overflow-hidden">
@@ -229,9 +248,10 @@ export default function Hero3D() {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto">
-        {/* Badge - Moved Down */}
+        {/* Badge - Moved to Top */}
         <motion.div
-          className="hero-badge inline-block mb-6"
+          className="hero-badge inline-block mb-8"
+          style={{ marginTop: '-80px' }}
           whileHover={{ scale: 1.05 }}
         >
           <div className="relative group">

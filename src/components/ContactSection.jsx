@@ -89,7 +89,7 @@ export default function ContactSection() {
   ];
 
   return (
-    <section id="contact" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-black overflow-hidden">
+    <section id="contact" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-black w-full">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />

@@ -59,7 +59,7 @@ export default function HeroAnimated() {
   };
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden">
+    <section id="home" className="min-h-screen flex items-center justify-center px-6 relative w-full">
       <div className="absolute inset-0">
         <motion.div 
           className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"

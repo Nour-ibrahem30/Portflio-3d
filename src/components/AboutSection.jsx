@@ -64,7 +64,7 @@ export default function AboutSection() {
   ];
 
   return (
-    <section id="about" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-black overflow-hidden">
+    <section id="about" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-black w-full">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
         <motion.div

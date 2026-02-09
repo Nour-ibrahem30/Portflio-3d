@@ -166,7 +166,7 @@ export default function HeroSection() {
     <motion.section 
       ref={heroRef}
       style={{ y, opacity }}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
+      className="relative min-h-screen flex items-center justify-center w-full bg-black"
     >
       {/* Canvas Particles */}
       <canvas

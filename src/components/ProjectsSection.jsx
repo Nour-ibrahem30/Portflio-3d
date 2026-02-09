@@ -243,7 +243,7 @@ export default function ProjectsSection() {
   }, [isInView]);
 
   return (
-    <section id="projects" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black overflow-hidden">
+    <section id="projects" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black w-full">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
         <motion.div

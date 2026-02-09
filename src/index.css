@@ -8,9 +8,15 @@
   box-sizing: border-box;
 }
 
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow-x: hidden;
   background: #000;
   color: #fff;
   -webkit-font-smoothing: antialiased;
@@ -18,8 +24,53 @@ body {
   cursor: none !important;
 }
 
+/* Hide scrollbar but keep scroll functionality */
+body::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+}
+
+body {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+}
+
 body * {
   cursor: none !important;
+}
+
+/* Show pointer cursor on videos, images, and interactive elements */
+video,
+video *,
+img[role="button"],
+img.cursor-pointer,
+button,
+a {
+  cursor: pointer !important;
+}
+
+/* Show default cursor on video controls */
+video::-webkit-media-controls,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-fullscreen-button {
+  cursor: pointer !important;
 }
 
 /* Hide default cursor globally */
@@ -31,13 +82,41 @@ body * {
   cursor: none !important;
 }
 
+/* Override for videos and clickable images */
+.cursor-none video,
+.cursor-none video *,
+.cursor-none img[role="button"],
+.cursor-none img.cursor-pointer,
+.cursor-none button,
+.cursor-none a {
+  cursor: pointer !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 #root {
   width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
+  position: relative;
+}
+
+/* Ensure all sections stay within viewport */
+section {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Ensure all containers respect viewport width */
+* {
+  box-sizing: border-box;
+}
+
+*:not(html):not(body) {
+  max-width: 100%;
 }
 
 /* Custom Cursor */
@@ -129,6 +208,11 @@ a, button {
 /* Remove transitions for transforms and opacity (handled by animations) */
 *:not(.no-transition) {
   transition-property: color, background-color, border-color;
+}
+
+/* Popup visibility transition */
+[style*="visibility"] {
+  transition: visibility 0.3s, opacity 0.3s ease, transform 0.3s ease !important;
 }
 
 /* Mobile cursor fallback */
@@ -258,4 +342,16 @@ a, button {
 .animate-rotate3d {
   animation: rotate3d 10s linear infinite;
   transform-style: preserve-3d;
+}
+
+/* Fix video and image overflow */
+video, img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }

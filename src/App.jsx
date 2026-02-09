@@ -7,8 +7,8 @@ import Navigation from './components/Navigation';
 import HeroSection from './components/Hero3D';
 import AboutSection from './components/AboutSection';
 import SkillsSection from './components/SkillsSection-Simple';
-import TimelineSection from './components/TimelineSection-Simple';
-import ProjectsSection from './components/ProjectsSection';
+import TimelineSection from './components/TimelineSection-Enhanced';
+import ProjectsSection from './components/ProjectsSection-Enhanced';
 import BlogSection from './components/BlogSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import ContactSection from './components/ContactSection';
@@ -18,6 +18,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isOnVideo, setIsOnVideo] = useState(false);
 
   // Track mouse position for custom cursor - optimized
   useEffect(() => {
@@ -26,6 +27,18 @@ function App() {
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
         setMousePosition({ x: e.clientX, y: e.clientY });
+        
+        // Check if mouse is over a video or clickable image element
+        const element = document.elementFromPoint(e.clientX, e.clientY);
+        const isVideo = element?.tagName === 'VIDEO' || element?.closest('video');
+        const isClickableImage = element?.tagName === 'IMG' && (
+          element?.classList.contains('cursor-pointer') || 
+          element?.getAttribute('role') === 'button' ||
+          element?.onclick ||
+          element?.closest('[role="button"]')
+        );
+        setIsOnVideo(isVideo || isClickableImage);
+        
         rafId = null;
       });
     };
@@ -94,7 +107,7 @@ function App() {
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 0.5 }}
-        className="relative min-h-screen bg-black text-white overflow-x-hidden"
+        className="relative min-h-screen bg-black text-white w-full"
       >
         {/* Version Badge */}
         <motion.div
@@ -125,16 +138,18 @@ function App() {
         </motion.div>
 
         {/* Custom Cursor - Optimized */}
-        <motion.div
-          className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
-          style={{
-            left: mousePosition.x - 12,
-            top: mousePosition.y - 12,
-          }}
-        >
-          <div className="absolute inset-0 border-2 border-purple-400 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full" />
-        </motion.div>
+        {!isOnVideo && (
+          <motion.div
+            className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
+            style={{
+              left: mousePosition.x - 12,
+              top: mousePosition.y - 12,
+            }}
+          >
+            <div className="absolute inset-0 border-2 border-purple-400 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full" />
+          </motion.div>
+        )}
 
         {/* Navigation */}
         <Navigation activeSection={activeSection} />

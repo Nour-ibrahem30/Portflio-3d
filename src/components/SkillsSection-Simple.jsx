@@ -76,7 +76,7 @@ export default function SkillsSection() {
   }, []);
 
   return (
-    <section id="skills" className="relative min-h-screen py-32 px-6 md:px-12 bg-zinc-950 overflow-hidden">
+    <section id="skills" className="relative min-h-screen py-32 px-6 md:px-12 bg-zinc-950 w-full">
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <motion.div
