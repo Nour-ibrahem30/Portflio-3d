@@ -21,7 +21,6 @@ body {
   color: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: none !important;
 }
 
 /* Hide scrollbar but keep scroll functionality */
@@ -46,56 +45,7 @@ body {
   scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
 }
 
-body * {
-  cursor: none !important;
-}
 
-/* Show pointer cursor on videos, images, and interactive elements */
-video,
-video *,
-video::-webkit-media-controls,
-video::-webkit-media-controls-panel,
-video::-webkit-media-controls-play-button,
-video::-webkit-media-controls-timeline,
-video::-webkit-media-controls-current-time-display,
-video::-webkit-media-controls-time-remaining-display,
-video::-webkit-media-controls-mute-button,
-video::-webkit-media-controls-volume-slider,
-video::-webkit-media-controls-fullscreen-button,
-img[role="button"],
-img.cursor-pointer,
-button,
-a {
-  cursor: auto !important;
-}
-
-/* Hide default cursor globally */
-.cursor-none {
-  cursor: none !important;
-}
-
-.cursor-none * {
-  cursor: none !important;
-}
-
-/* Override for videos and clickable images */
-.cursor-none video,
-.cursor-none video *,
-.cursor-none video::-webkit-media-controls,
-.cursor-none video::-webkit-media-controls-panel,
-.cursor-none video::-webkit-media-controls-play-button,
-.cursor-none video::-webkit-media-controls-timeline,
-.cursor-none video::-webkit-media-controls-current-time-display,
-.cursor-none video::-webkit-media-controls-time-remaining-display,
-.cursor-none video::-webkit-media-controls-mute-button,
-.cursor-none video::-webkit-media-controls-volume-slider,
-.cursor-none video::-webkit-media-controls-fullscreen-button,
-.cursor-none img[role="button"],
-.cursor-none img.cursor-pointer,
-.cursor-none button,
-.cursor-none a {
-  cursor: auto !important;
-}
 
 html {
   scroll-behavior: smooth;
@@ -124,42 +74,7 @@ section {
   max-width: 100%;
 }
 
-/* Custom Cursor */
-.custom-cursor {
-  position: fixed;
-  width: 8px;
-  height: 8px;
-  background: #a855f7;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s, background 0.3s;
-}
 
-.custom-cursor-follower {
-  position: fixed;
-  width: 40px;
-  height: 40px;
-  border: 2px solid rgba(168, 85, 247, 0.3);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s, border-color 0.3s;
-}
-
-.custom-cursor.cursor-hover {
-  width: 16px;
-  height: 16px;
-  background: #ec4899;
-}
-
-.custom-cursor-follower.cursor-hover {
-  width: 60px;
-  height: 60px;
-  border-color: rgba(236, 72, 153, 0.5);
-}
 
 /* Hide default cursor on interactive elements */
 a, button {
@@ -220,21 +135,7 @@ a, button {
   transition: visibility 0.3s, opacity 0.3s ease, transform 0.3s ease !important;
 }
 
-/* Mobile cursor fallback */
-@media (max-width: 768px) {
-  body {
-    cursor: auto;
-  }
-  
-  .custom-cursor,
-  .custom-cursor-follower {
-    display: none;
-  }
-  
-  a, button {
-    cursor: pointer;
-  }
-}
+
 
 /* Gradient Animation */
 @keyframes gradient {
@@ -451,63 +352,30 @@ html {
   }
 }
 
-/* Video Controls Fix - Make sure videos are clickable */
-video {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
 
-video::-webkit-media-controls {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-panel {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-play-button {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-timeline {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-current-time-display {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-time-remaining-display {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-mute-button {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-volume-slider {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-video::-webkit-media-controls-fullscreen-button {
-  cursor: auto !important;
-  pointer-events: auto !important;
-}
-
-/* Ensure video container doesn't block clicks */
-.relative.rounded-lg.overflow-hidden.bg-zinc-800 {
-  pointer-events: auto !important;
-}
 
 /* Z-index fix for popups */
 [class*="absolute top-full"] {
   z-index: 9999;
 }
+
+/* Custom Video Controls Styling - Simple approach */
+video {
+  border-radius: 12px;
+  outline: none;
+}
+
+/* Style the video container */
+video::-webkit-media-controls {
+  opacity: 1;
+}
+
+video::-webkit-media-controls-enclosure {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+  border-radius: 0 0 12px 12px;
+}
+
+video::-webkit-media-controls-panel {
+  background: transparent;
+}
+

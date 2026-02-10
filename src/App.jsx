@@ -17,38 +17,6 @@ import './index.css';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isOnVideo, setIsOnVideo] = useState(false);
-
-  // Track mouse position for custom cursor - optimized
-  useEffect(() => {
-    let rafId;
-    const handleMouseMove = (e) => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
-        
-        // Check if mouse is over a video or clickable image element
-        const element = document.elementFromPoint(e.clientX, e.clientY);
-        const isVideo = element?.tagName === 'VIDEO' || element?.closest('video');
-        const isClickableImage = element?.tagName === 'IMG' && (
-          element?.classList.contains('cursor-pointer') || 
-          element?.getAttribute('role') === 'button' ||
-          element?.onclick ||
-          element?.closest('[role="button"]')
-        );
-        setIsOnVideo(isVideo || isClickableImage);
-        
-        rafId = null;
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
 
   useEffect(() => {
     // Smooth scroll
@@ -131,31 +99,11 @@ function App() {
                 className="w-2 h-2 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
               />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                Beta v 0.2.12
+                Beta v 0.2.20
               </span>
             </div>
           </div>
         </motion.div>
-
-        {/* Custom Cursor - Optimized */}
-        {!isOnVideo && (
-          <motion.div
-            className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
-            animate={{
-              left: mousePosition.x - 12,
-              top: mousePosition.y - 12,
-            }}
-            transition={{
-              type: "spring",
-              damping: 30,
-              stiffness: 400,
-              mass: 0.5
-            }}
-          >
-            <div className="absolute inset-0 border-2 border-purple-400 rounded-full" />
-            <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 bg-purple-400 rounded-full" />
-          </motion.div>
-        )}
 
         {/* Navigation */}
         <Navigation activeSection={activeSection} />
@@ -236,7 +184,7 @@ function App() {
               © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
             </p>
             <p className="text-gray-700 text-xs mt-2">
-              Beta v 0.2.12 — Work in Progress
+              Beta v 0.2.20 — Work in Progress
             </p>
           </div>
         </footer>

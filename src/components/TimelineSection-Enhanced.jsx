@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { timelineConfig, typeColors } from '../config/timelineConfig';
 import { getProjectTimeline } from '../config/timelineConfig';
 import ImageLightbox from './ImageLightbox';
+import CustomVideoPlayer from './CustomVideoPlayer';
 
 export default function TimelineSectionEnhanced() {
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -129,21 +130,15 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
       }`}
     >
       {/* Year badge */}
-      <motion.div
-        whileHover={{ scale: 1.3 }}
-        transition={{ duration: 0.3 }}
-        className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-20"
-      >
+      <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 z-20">
         <div className={`w-6 h-6 bg-gradient-to-br ${typeColors[entry.type]} rounded-full shadow-lg border-4 border-black`} />
-      </motion.div>
+      </div>
 
       {/* Content */}
       <div className={`w-full md:w-5/12 ml-20 md:ml-0 ${
         index % 2 === 0 ? 'md:pr-20 md:text-right' : 'md:pl-20'
       }`}>
-        <motion.div
-          whileHover={{ scale: 1.03, y: -5 }}
-          transition={{ duration: 0.3 }}
+        <div
           className="relative group cursor-pointer overflow-visible"
           onClick={togglePopup}
         >
@@ -199,13 +194,12 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                 index % 2 === 0 ? 'md:justify-end' : ''
               }`}>
                 {entry.skills.map((skill) => (
-                  <motion.span
+                  <span
                     key={skill}
-                    whileHover={{ scale: 1.1, y: -2 }}
                     className="px-3 py-1 bg-zinc-800 text-gray-300 rounded-full text-xs font-medium border border-gray-700 hover:border-purple-500 transition-colors"
                   >
                     {skill}
-                  </motion.span>
+                  </span>
                 ))}
               </div>
 
@@ -220,8 +214,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                     index % 2 === 0 ? 'md:justify-end' : ''
                   }`}>
                     {/* View Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
+                    <div
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                         isPopupOpen 
                           ? 'bg-purple-500 text-white' 
@@ -236,7 +229,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                         )}
                       </svg>
                       <span>{isPopupOpen ? 'Click to Close' : 'Click to View'}</span>
-                    </motion.div>
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -266,7 +259,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
               onClose={closePopup}
             />
           )}
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
@@ -346,24 +339,17 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
             </AnimatePresence>
             
             {/* Click to view overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-none"
-            >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="text-center">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="w-16 h-16 mx-auto mb-2 bg-white/20 rounded-full flex items-center justify-center"
-                >
+                <div className="w-16 h-16 mx-auto mb-2 bg-white/20 rounded-full flex items-center justify-center">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                   </svg>
-                </motion.div>
+                </div>
                 <p className="text-white font-semibold text-sm">Click to view full size</p>
                 <p className="text-white/70 text-xs mt-1">{entry.eventPhotos.length} photos</p>
               </div>
-            </motion.div>
+            </div>
             
             {/* Photo counter */}
             <div className="absolute bottom-2 right-2 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs text-white pointer-events-none">
@@ -406,16 +392,15 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
               </h4>
               <div className="space-y-2">
                 {entry.projects.map((projectName) => (
-                  <motion.div
+                  <div
                     key={projectName}
-                    whileHover={{ x: 5 }}
                     className="flex items-center gap-2 text-sm text-gray-300 hover:text-purple-400 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
                     </svg>
                     <span>{projectName}</span>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -432,19 +417,18 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
               </h4>
               <div className="space-y-2">
                 {entry.liveUrls.map((site, idx) => (
-                  <motion.a
+                  <a
                     key={idx}
                     href={site.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ x: 5 }}
                     className="flex items-center gap-2 text-sm text-gray-300 hover:text-blue-400 transition-colors group"
                   >
                     <svg className="w-4 h-4 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                     <span>{site.name}</span>
-                  </motion.a>
+                  </a>
                 ))}
               </div>
             </div>
@@ -461,41 +445,9 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
               </h4>
               <div className="space-y-3 w-full">
                 {entry.eventVideos.map((videoUrl, idx) => (
-                  <div
-                    key={idx}
-                    className="relative rounded-lg overflow-hidden bg-zinc-800 w-full cursor-pointer"
-                    onClick={(e) => {
-                      const video = e.currentTarget.querySelector('video');
-                      if (video) {
-                        if (video.paused) {
-                          video.play();
-                        } else {
-                          video.pause();
-                        }
-                      }
-                    }}
-                  >
-                    <video
-                      src={videoUrl}
-                      controls
-                      className="w-full h-auto max-h-48"
-                      preload="metadata"
-                      style={{ width: '100%', height: 'auto', maxHeight: '12rem', objectFit: 'contain' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (e.target.paused) {
-                          e.target.play();
-                        } else {
-                          e.target.pause();
-                        }
-                      }}
-                      onError={(e) => {
-                        console.error('Video failed to load:', videoUrl);
-                      }}
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded text-xs text-white pointer-events-none">
+                  <div key={idx} className="relative rounded-lg overflow-hidden bg-zinc-800">
+                    <CustomVideoPlayer src={videoUrl} className="w-full max-h-48" />
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-black/70 backdrop-blur-sm rounded text-xs text-white pointer-events-none z-10">
                       Video {idx + 1}
                     </div>
                   </div>
