@@ -289,25 +289,34 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
 
   if (!isVisible) return null;
 
+  // Calculate z-index based on entry position to ensure Green Studio appears above YLY
+  const getZIndex = () => {
+    if (entry.company.includes('Green Studio')) return 10000;
+    if (entry.company.includes('YLY')) return 9999;
+    return 9999;
+  };
+
   return (
     <div
       className={`absolute top-full mt-4 ${
         position === 'right' ? 'md:right-0' : 'md:left-0'
-      } left-0 w-full md:w-96 z-[9999] animate-in fade-in slide-in-from-top-2 duration-300`}
+      } left-0 w-full md:w-96 animate-in fade-in slide-in-from-top-2 duration-300`}
       style={{ 
         position: 'absolute', 
-        maxWidth: 'min(24rem, calc(100vw - 3rem))'
+        maxWidth: 'min(24rem, calc(100vw - 3rem))',
+        zIndex: getZIndex()
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="bg-zinc-900 border border-purple-500/50 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl relative z-[9999] w-full">
+      <div className="bg-zinc-900 border border-purple-500/50 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl relative w-full">
         {/* Close Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
-          className="absolute top-3 right-3 z-[10000] w-8 h-8 flex items-center justify-center bg-black/70 hover:bg-red-500 rounded-full transition-colors group"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black/70 hover:bg-red-500 rounded-full transition-colors group"
+          style={{ zIndex: 10001 }}
         >
           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

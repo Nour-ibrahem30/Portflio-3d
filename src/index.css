@@ -53,14 +53,6 @@ body * {
 /* Show pointer cursor on videos, images, and interactive elements */
 video,
 video *,
-img[role="button"],
-img.cursor-pointer,
-button,
-a {
-  cursor: pointer !important;
-}
-
-/* Show default cursor on video controls */
 video::-webkit-media-controls,
 video::-webkit-media-controls-panel,
 video::-webkit-media-controls-play-button,
@@ -69,8 +61,12 @@ video::-webkit-media-controls-current-time-display,
 video::-webkit-media-controls-time-remaining-display,
 video::-webkit-media-controls-mute-button,
 video::-webkit-media-controls-volume-slider,
-video::-webkit-media-controls-fullscreen-button {
-  cursor: pointer !important;
+video::-webkit-media-controls-fullscreen-button,
+img[role="button"],
+img.cursor-pointer,
+button,
+a {
+  cursor: auto !important;
 }
 
 /* Hide default cursor globally */
@@ -85,11 +81,20 @@ video::-webkit-media-controls-fullscreen-button {
 /* Override for videos and clickable images */
 .cursor-none video,
 .cursor-none video *,
+.cursor-none video::-webkit-media-controls,
+.cursor-none video::-webkit-media-controls-panel,
+.cursor-none video::-webkit-media-controls-play-button,
+.cursor-none video::-webkit-media-controls-timeline,
+.cursor-none video::-webkit-media-controls-current-time-display,
+.cursor-none video::-webkit-media-controls-time-remaining-display,
+.cursor-none video::-webkit-media-controls-mute-button,
+.cursor-none video::-webkit-media-controls-volume-slider,
+.cursor-none video::-webkit-media-controls-fullscreen-button,
 .cursor-none img[role="button"],
 .cursor-none img.cursor-pointer,
 .cursor-none button,
 .cursor-none a {
-  cursor: pointer !important;
+  cursor: auto !important;
 }
 
 html {
@@ -354,4 +359,155 @@ video, img {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Mobile Horizontal Scroll Fix - Only for screens < 768px */
+@media (max-width: 768px) {
+  html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  #root {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  section {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  main {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Fix for all containers */
+  div {
+    max-width: 100vw;
+  }
+
+  /* Fix for text elements */
+  h1, h2, h3, h4, h5, h6, p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Fix for containers with max-width classes */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+    max-width: 100% !important;
+  }
+
+  /* Fix for grid layouts */
+  .grid {
+    overflow-x: hidden !important;
+  }
+
+  /* Fix for absolute positioned elements */
+  .absolute {
+    max-width: 100vw !important;
+  }
+
+  /* Fix for fixed positioned elements */
+  .fixed {
+    max-width: 100vw !important;
+  }
+
+  /* Fix for relative positioned elements */
+  .relative {
+    max-width: 100vw !important;
+  }
+
+  /* Fix for canvas elements */
+  canvas {
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  /* Fix for images and videos */
+  img, video, iframe {
+    max-width: 100% !important;
+  }
+
+  /* Fix for motion/framer-motion elements */
+  [class*="motion"] {
+    max-width: 100vw !important;
+  }
+
+  /* Fix for flex containers */
+  .flex {
+    max-width: 100vw !important;
+  }
+
+  /* Fix for any element with transform */
+  [style*="transform"] {
+    max-width: 100vw !important;
+  }
+}
+
+/* Video Controls Fix - Make sure videos are clickable */
+video {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-panel {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-play-button {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-timeline {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-current-time-display {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-time-remaining-display {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-mute-button {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-volume-slider {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+video::-webkit-media-controls-fullscreen-button {
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure video container doesn't block clicks */
+.relative.rounded-lg.overflow-hidden.bg-zinc-800 {
+  pointer-events: auto !important;
+}
+
+/* Z-index fix for popups */
+[class*="absolute top-full"] {
+  z-index: 9999;
 }

@@ -131,7 +131,7 @@ function App() {
                 className="w-2 h-2 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
               />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                Beta v0.1
+                Beta v 0.2.12
               </span>
             </div>
           </div>
@@ -141,9 +141,15 @@ function App() {
         {!isOnVideo && (
           <motion.div
             className="hidden md:block fixed w-6 h-6 pointer-events-none z-[9999] mix-blend-difference"
-            style={{
+            animate={{
               left: mousePosition.x - 12,
               top: mousePosition.y - 12,
+            }}
+            transition={{
+              type: "spring",
+              damping: 30,
+              stiffness: 400,
+              mass: 0.5
             }}
           >
             <div className="absolute inset-0 border-2 border-purple-400 rounded-full" />
@@ -230,7 +236,7 @@ function App() {
               © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
             </p>
             <p className="text-gray-700 text-xs mt-2">
-              Beta Version 0.1 — Work in Progress
+              Beta v 0.2.12 — Work in Progress
             </p>
           </div>
         </footer>

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import gsap from 'gsap';
 import MagneticButton from './MagneticButton';
+import { db } from '../firebase/config';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ContactSection() {
   const sectionRef = useRef(null);
@@ -11,6 +13,8 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState('');
   const [focusedField, setFocusedField] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedData, setSubmittedData] = useState({ name: '', email: '' });
 
   useEffect(() => {
     if (isInView && titleRef.current) {
@@ -28,13 +32,48 @@ export default function ContactSection() {
     }
   }, [isInView]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('success');
-    setTimeout(() => {
+    setIsSubmitting(true);
+    setStatus('');
+
+    try {
+      // Check if Firebase is initialized
+      if (!db) {
+        throw new Error('Firebase is not initialized');
+      }
+
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, 'contacts'), {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        timestamp: serverTimestamp(),
+        read: false
+      });
+
+      console.log('Document written with ID: ', docRef.id);
+
+      // Store submitted data before clearing form
+      setSubmittedData({ name: formData.name, email: formData.email });
+      
+      // Clear form and show success
       setFormData({ name: '', email: '', message: '' });
-      setStatus('');
-    }, 3000);
+      setStatus('success');
+      
+      // Hide success message after 8 seconds
+      setTimeout(() => {
+        setStatus('');
+        setSubmittedData({ name: '', email: '' });
+      }, 8000);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      console.error('Error details:', error.message);
+      setStatus('error');
+      setTimeout(() => setStatus(''), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -238,23 +277,30 @@ export default function ContactSection() {
                 transition={{ duration: 0.5, delay: 0.5 }}
                 className="relative"
               >
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  placeholder="YOUR NAME"
-                  className="w-full px-0 py-4 bg-transparent border-b-2 border-zinc-800 text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 uppercase tracking-wider text-lg"
-                />
-                <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: focusedField === 'name' ? '100%' : 0 }}
-                  transition={{ duration: 0.3 }}
-                />
+                <label className="block text-gray-400 text-sm font-medium mb-3 uppercase tracking-wider px-3">
+                  Your Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    placeholder="Enter your name"
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 backdrop-blur-sm"
+                  />
+                  {focusedField === 'name' && (
+                    <motion.div
+                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    />
+                  )}
+                </div>
               </motion.div>
 
               {/* Email Input */}
@@ -264,23 +310,30 @@ export default function ContactSection() {
                 transition={{ duration: 0.5, delay: 0.6 }}
                 className="relative"
               >
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  placeholder="YOUR EMAIL"
-                  className="w-full px-0 py-4 bg-transparent border-b-2 border-zinc-800 text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 uppercase tracking-wider text-lg"
-                />
-                <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: focusedField === 'email' ? '100%' : 0 }}
-                  transition={{ duration: 0.3 }}
-                />
+                <label className="block text-gray-400 text-sm font-medium mb-3 uppercase tracking-wider px-3">
+                  Your Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    placeholder="Enter your email"
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 backdrop-blur-sm"
+                  />
+                  {focusedField === 'email' && (
+                    <motion.div
+                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    />
+                  )}
+                </div>
               </motion.div>
 
               {/* Message Textarea */}
@@ -290,23 +343,30 @@ export default function ContactSection() {
                 transition={{ duration: 0.5, delay: 0.7 }}
                 className="relative"
               >
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('message')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  rows="6"
-                  placeholder="YOUR MESSAGE"
-                  className="w-full px-0 py-4 bg-transparent border-b-2 border-zinc-800 text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 resize-none uppercase tracking-wider text-lg"
-                />
-                <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500"
-                  initial={{ width: 0 }}
-                  animate={{ width: focusedField === 'message' ? '100%' : 0 }}
-                  transition={{ duration: 0.3 }}
-                />
+                <label className="block text-gray-400 text-sm font-medium mb-3 uppercase tracking-wider px-3">
+                  Your Message
+                </label>
+                <div className="relative">
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('message')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    rows="6"
+                    placeholder="Tell me about your project..."
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 resize-none backdrop-blur-sm"
+                  />
+                  {focusedField === 'message' && (
+                    <motion.div
+                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    />
+                  )}
+                </div>
               </motion.div>
 
               {/* Submit Button */}
@@ -317,19 +377,22 @@ export default function ContactSection() {
               >
                 <MagneticButton
                   type="submit"
-                  className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/50 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="relative z-10 flex items-center gap-3">
-                    Send Message
-                    <motion.svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      whileHover={{ x: 5 }}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </motion.svg>
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    {!isSubmitting && (
+                      <motion.svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        whileHover={{ x: 5 }}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </motion.svg>
+                    )}
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600"
@@ -348,15 +411,50 @@ export default function ContactSection() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="p-6 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl backdrop-blur-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
+                    <div className="flex-1">
+                      <div className="text-green-400 font-bold text-xl mb-2">
+                        شكراً لك {submittedData.name}! 🎉
+                      </div>
+                      <div className="text-gray-300 text-base leading-relaxed mb-3">
+                        تم استلام رسالتك بنجاح! سأقوم بالرد عليك في أقرب وقت ممكن على البريد الإلكتروني:
+                      </div>
+                      <div className="text-purple-400 font-semibold text-base mb-3 break-all">
+                        {submittedData.email}
+                      </div>
+                      <div className="text-gray-400 text-sm flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        عادةً ما أرد خلال 24-48 ساعة
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Error Message */}
+              {status === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="p-6 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
                     <div>
-                      <div className="text-green-400 font-semibold uppercase tracking-wider">Success!</div>
-                      <div className="text-gray-400 text-sm">Your message has been sent successfully.</div>
+                      <div className="text-red-400 font-semibold uppercase tracking-wider">Error!</div>
+                      <div className="text-gray-400 text-sm">Failed to send message. Please try again.</div>
                     </div>
                   </div>
                 </motion.div>
