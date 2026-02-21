@@ -238,44 +238,6 @@ export const timelineConfig = [
       duration: '4 months',
     },
   },
-  {
-    id: 'favourite-moments-2025',
-    year: '2025',
-    title: 'My Favourite Moments',
-    company: 'Personal Collection',
-    location: 'Various Locations',
-    period: '2025',
-    description: 'A curated collection of my favorite moments and experiences throughout my journey. These videos capture special memories, achievements, and milestones that define my personal and professional growth.',
-    skills: ['Videography', 'Content Creation', 'Storytelling'],
-    type: 'event',
-    projects: [],
-    liveUrls: [],
-    // Favourite videos with thumbnails
-    eventPhotos: [
-      '/My_Favourite_Videos/2.jpg',
-    ].map(path => {
-      const parts = path.split('/');
-      const filename = parts[parts.length - 1];
-      const directory = parts.slice(0, -1).join('/');
-      return `${directory}/${encodeURIComponent(filename)}`;
-    }),
-    eventVideos: [
-      '/My_Favourite_Videos/1.mp4',
-      '/My_Favourite_Videos/3.mp4',
-      '/My_Favourite_Videos/4.mp4',
-      '/My_Favourite_Videos/5.mp4',
-      '/My_Favourite_Videos/6.mp4',
-    ].map(path => {
-      const parts = path.split('/');
-      const filename = parts[parts.length - 1];
-      const directory = parts.slice(0, -1).join('/');
-      return `${directory}/${encodeURIComponent(filename)}`;
-    }),
-    stats: {
-      videosCount: 5,
-      duration: 'Ongoing',
-    },
-  },
 ];
 
 /**
