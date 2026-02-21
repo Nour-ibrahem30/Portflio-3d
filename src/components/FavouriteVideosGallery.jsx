@@ -26,22 +26,20 @@ export default function FavouriteVideosGallery() {
     });
     
     setPlayingVideo(videoId);
-    setLoadingVideo(videoId);
     
-    // Start playing when ready
+    // Start playing immediately
     setTimeout(() => {
       const videoElement = videoRefs.current[videoId];
       if (videoElement) {
         videoElement.play().catch(err => {
           console.log('Play error:', err);
-          setLoadingVideo(null);
         });
       }
-    }, 100);
+    }, 50);
   };
 
   const handleVideoLoaded = (e, videoId) => {
-    if (e.target.readyState >= 3) {
+    if (e.target.readyState >= 2) { // HAVE_CURRENT_DATA - can start playing
       setLoadingVideo(null);
       setBuffering(prev => ({ ...prev, [videoId]: false }));
     }
@@ -134,9 +132,17 @@ export default function FavouriteVideosGallery() {
                       className="w-full h-full object-cover bg-black"
                       controls
                       playsInline
-                      preload="metadata"
+                      preload="auto"
+                      muted={false}
+                      onLoadStart={() => setLoadingVideo(video.id)}
                       onLoadedData={(e) => handleVideoLoaded(e, video.id)}
-                      onCanPlayThrough={(e) => handleVideoLoaded(e, video.id)}
+                      onCanPlay={(e) => {
+                        handleVideoLoaded(e, video.id);
+                        // Auto play when ready
+                        if (playingVideo === video.id) {
+                          e.target.play().catch(() => {});
+                        }
+                      }}
                       onWaiting={() => handleWaiting(video.id)}
                       onPlaying={() => handlePlaying(video.id)}
                       onEnded={() => {
