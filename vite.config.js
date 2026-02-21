@@ -9,20 +9,13 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'animation-vendor': ['framer-motion', 'gsap', '@gsap/react'],
-          'three-vendor': ['three'],
         },
       },
     },
     chunkSizeWarningLimit: 1000,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    minify: 'esbuild',
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion', 'gsap', 'three'],
+    include: ['react', 'react-dom', 'framer-motion', 'gsap'],
   },
 })
