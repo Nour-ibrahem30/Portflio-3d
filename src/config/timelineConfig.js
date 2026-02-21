@@ -190,12 +190,13 @@ export const timelineConfig = [
     // Event photos
     eventPhotos: [
       '/YLY_Photos/1.jpeg',
-      '/YLY_Photos/2.jpg',
+      '/YLY_Photos/2.jpeg',
       '/YLY_Photos/3.jpg',
-      '/YLY_Photos/4.jpeg',
-      '/YLY_Photos/5.jpg',
-      '/YLY_Photos/6.jpeg',
-      '/YLY_Photos/7.jpg',
+      '/YLY_Photos/4.jpg',
+      '/YLY_Photos/5.jpeg',
+      '/YLY_Photos/6.jpg',
+      '/YLY_Photos/7.jpeg',
+      '/YLY_Photos/8.jpg',
     ].map(path => {
       const parts = path.split('/');
       const filename = parts[parts.length - 1];
@@ -235,6 +236,44 @@ export const timelineConfig = [
     stats: {
       projectsCompleted: 1,
       duration: '4 months',
+    },
+  },
+  {
+    id: 'favourite-moments-2025',
+    year: '2025',
+    title: 'My Favourite Moments',
+    company: 'Personal Collection',
+    location: 'Various Locations',
+    period: '2025',
+    description: 'A curated collection of my favorite moments and experiences throughout my journey. These videos capture special memories, achievements, and milestones that define my personal and professional growth.',
+    skills: ['Videography', 'Content Creation', 'Storytelling'],
+    type: 'event',
+    projects: [],
+    liveUrls: [],
+    // Favourite videos with thumbnails
+    eventPhotos: [
+      '/My_Favourite_Videos/2.jpg',
+    ].map(path => {
+      const parts = path.split('/');
+      const filename = parts[parts.length - 1];
+      const directory = parts.slice(0, -1).join('/');
+      return `${directory}/${encodeURIComponent(filename)}`;
+    }),
+    eventVideos: [
+      '/My_Favourite_Videos/1.mp4',
+      '/My_Favourite_Videos/3.mp4',
+      '/My_Favourite_Videos/4.mp4',
+      '/My_Favourite_Videos/5.mp4',
+      '/My_Favourite_Videos/6.mp4',
+    ].map(path => {
+      const parts = path.split('/');
+      const filename = parts[parts.length - 1];
+      const directory = parts.slice(0, -1).join('/');
+      return `${directory}/${encodeURIComponent(filename)}`;
+    }),
+    stats: {
+      videosCount: 5,
+      duration: 'Ongoing',
     },
   },
 ];

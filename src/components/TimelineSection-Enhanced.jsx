@@ -331,6 +331,7 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.5 }}
                 className="w-full h-full object-cover pointer-events-none cursor-pointer"
+                loading="lazy"
                 role="button"
                 onError={(e) => {
                   e.target.style.display = 'none';

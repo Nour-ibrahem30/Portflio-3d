@@ -3,7 +3,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { organizeProjects, applyProjectOverrides, isNewProject } from '../utils/projectUtils';
-import { projectsConfig } from '../config/projectsConfig';
+import { projectsConfig, getProjectOverride } from '../config/projectsConfig';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,11 +39,50 @@ export default function ProjectsSectionEnhanced() {
         const repos = await reposResponse.json();
         const ownRepos = repos.filter(repo => !repo.fork);
         
+        // Add local projects
+        const localProjects = [];
+        Object.keys(projectsConfig.overrides).forEach(projectName => {
+          const override = projectsConfig.overrides[projectName];
+          if (override.isLocalProject) {
+            localProjects.push({
+              id: `local-${projectName}`,
+              name: projectName,
+              full_name: `local/${projectName}`,
+              description: override.customDescription || '',
+              html_url: override.liveUrl || '#',
+              homepage: override.liveUrl || '#',
+              stargazers_count: 0,
+              forks_count: 0,
+              language: override.tags?.[0] || 'Media',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              default_branch: 'main',
+            });
+          }
+        });
+        
+        const allRepos = [...localProjects, ...ownRepos];
+        
         // Fetch README and images for each repo
         const projectsWithData = await Promise.all(
-          ownRepos.map(async (repo) => {
+          allRepos.map(async (repo) => {
             let description = repo.description || 'No description available';
             let projectImage = null;
+            
+            // Handle local projects
+            const override = getProjectOverride(repo.name);
+            if (override?.isLocalProject) {
+              const mediaPath = override.localMediaPath || '';
+              // Use first image or video thumbnail from local folder
+              projectImage = `${mediaPath}/2.jpg`;
+              description = override.customDescription || description;
+              
+              return {
+                ...repo,
+                readme: description,
+                projectImage: projectImage
+              };
+            }
             
             try {
               const readmeResponse = await fetch(
@@ -85,18 +124,31 @@ export default function ProjectsSectionEnhanced() {
                   description = meaningfulText.substring(0, 150).trim() + '...';
                 }
                 
-                // Find images
+                // Find images - try multiple patterns
                 const imageRegex = /!\[.*?\]\((.*?)\)/g;
                 const images = [...readmeContent.matchAll(imageRegex)];
+                
+                // Also try to find direct image URLs
+                const urlRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg))/gi;
+                const directImages = [...readmeContent.matchAll(urlRegex)];
+                
                 if (images.length > 0) {
                   let imgUrl = images[0][1];
+                  // Clean up the URL (remove quotes, spaces, etc.)
+                  imgUrl = imgUrl.trim().replace(/['"]/g, '');
+                  
                   if (!imgUrl.startsWith('http')) {
+                    // Handle relative paths
                     imgUrl = `https://raw.githubusercontent.com/Nour-ibrahem30/${repo.name}/${repo.default_branch}/${imgUrl}`;
                   }
                   projectImage = imgUrl;
+                } else if (directImages.length > 0) {
+                  // Use first direct image URL found
+                  projectImage = directImages[0][1];
                 }
               }
               
+              // Fallback to GitHub OpenGraph only if no image found
               if (!projectImage) {
                 projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
               }

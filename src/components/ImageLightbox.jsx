@@ -93,6 +93,7 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
                 alt={`Photo ${currentIndex + 1}`}
                 className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
+                loading="lazy"
               />
 
               {/* Image glow effect */}
@@ -166,6 +167,7 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
                     src={image}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                   {index === currentIndex && (
                     <motion.div

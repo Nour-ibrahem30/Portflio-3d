@@ -40,7 +40,7 @@ export const projectsConfig = {
    * - Use for private experiments or incomplete work
    */
   hidden: [
-    // Add hidden project names here
+    'My-Favourite-Videos',
   ],
 
   /**
@@ -49,6 +49,16 @@ export const projectsConfig = {
    * - Useful for adding custom descriptions, images, or links
    */
   overrides: {
+    'My-Favourite-Videos': {
+      displayName: 'Guiding Moments',
+      customDescription: 'A curated selection of lectures and teachings from respected scholars, offering wisdom, reflection, and support during challenging times.',
+      featured: true,
+      liveUrl: '#favourite-videos',
+      tags: ['Lectures', 'Wisdom', 'Teachings', 'Inspiration'],
+      highlight: true,
+      isLocalProject: true,
+      localMediaPath: '/My_Favourite_Videos',
+    },
     'Portflio-3d': {
       displayName: 'Portfolio Website 3D',
       customDescription: 'Modern 3D portfolio website with interactive animations, built with React, Vite, and Tailwind CSS. Features dynamic GitHub API integration and smooth GSAP animations.',

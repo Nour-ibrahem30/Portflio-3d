@@ -1,18 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageLoader from './components/PageLoader';
 import SEO from './components/SEO';
 import Navigation from './components/Navigation';
 import HeroSection from './components/Hero3D';
-import AboutSection from './components/AboutSection';
-import SkillsSection from './components/SkillsSection-Simple';
-import TimelineSection from './components/TimelineSection-Enhanced';
-import ProjectsSection from './components/ProjectsSection-Enhanced';
-import BlogSection from './components/BlogSection';
-import TestimonialsSection from './components/TestimonialsSection';
-import ContactSection from './components/ContactSection';
 import './index.css';
+
+// Lazy load heavy components
+const AboutSection = lazy(() => import('./components/AboutSection'));
+const SkillsSection = lazy(() => import('./components/SkillsSection-Simple'));
+const TimelineSection = lazy(() => import('./components/TimelineSection-Enhanced'));
+const ProjectsSection = lazy(() => import('./components/ProjectsSection-Enhanced'));
+const FavouriteVideosGallery = lazy(() => import('./components/FavouriteVideosGallery'));
+const ContactSection = lazy(() => import('./components/ContactSection'));
+
+// Loading fallback component
+const SectionLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +43,7 @@ function App() {
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const sections = ['home', 'about', 'skills', 'projects', 'experience', 'contact'];
+          const sections = ['home', 'about', 'skills', 'projects', 'experience', 'favourite-videos', 'contact'];
           const scrollPosition = window.scrollY + 200;
 
           for (const section of sections) {
@@ -131,11 +139,26 @@ function App() {
           <div id="home">
             <HeroSection />
           </div>
-          <AboutSection />
-          <SkillsSection />
-          <ProjectsSection />
-          <TimelineSection />
-          <ContactSection />
+          <Suspense fallback={<SectionLoader />}>
+            <AboutSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <SkillsSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <ProjectsSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <TimelineSection />
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <div id="favourite-videos">
+              <FavouriteVideosGallery />
+            </div>
+          </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <ContactSection />
+          </Suspense>
         </main>
 
         <footer className="relative z-10 py-12 px-6 text-center border-t border-gray-900 bg-black">

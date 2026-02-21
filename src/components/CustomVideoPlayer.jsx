@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function CustomVideoPlayer({ src, className = '' }) {
+export default function CustomVideoPlayer({ src, className = '', poster = null }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -10,13 +10,17 @@ export default function CustomVideoPlayer({ src, className = '' }) {
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const controlsTimeoutRef = useRef(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleLoadedMetadata = () => setDuration(video.duration);
+    const handleLoadedMetadata = () => {
+      setDuration(video.duration);
+      setIsLoaded(true);
+    };
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleEnded = () => setIsPlaying(false);
 
@@ -104,11 +108,20 @@ export default function CustomVideoPlayer({ src, className = '' }) {
         style={{ maxHeight: '12rem', objectFit: 'contain' }}
         onClick={togglePlay}
         preload="metadata"
+        loading="lazy"
+        poster={poster}
       />
+
+      {/* Loading Spinner */}
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
 
       {/* Play/Pause Overlay */}
       <AnimatePresence>
-        {!isPlaying && (
+        {!isPlaying && isLoaded && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -131,7 +144,7 @@ export default function CustomVideoPlayer({ src, className = '' }) {
 
       {/* Custom Controls */}
       <AnimatePresence>
-        {showControls && (
+        {showControls && isLoaded && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

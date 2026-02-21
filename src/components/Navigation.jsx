@@ -19,6 +19,7 @@ export default function Navigation({ activeSection }) {
     { id: 'skills', label: 'Skills', icon: '⚡' },
     { id: 'projects', label: 'Projects', icon: '🚀' },
     { id: 'experience', label: 'Experience', icon: '💼' },
+    { id: 'favourite-videos', label: 'Videos', icon: '🎬' },
     { id: 'contact', label: 'Contact', icon: '📧' },
   ];
 
