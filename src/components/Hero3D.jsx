@@ -402,7 +402,7 @@ export default function Hero3D() {
           className="flex items-center justify-center gap-8 md:gap-16 flex-wrap"
         >
           {[
-            { value: '20+', label: 'Projects' },
+            { value: '30+', label: 'Projects' },
             { value: '2+', label: 'Years' },
             { value: '50+', label: 'Students' },
           ].map((stat, i) => (
