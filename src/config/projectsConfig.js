@@ -66,6 +66,7 @@ export const projectsConfig = {
       liveUrl: 'https://nour-ibrahem30.github.io/Portflio-3d/',
       tags: ['React', 'Vite', 'Tailwind CSS', 'GSAP', 'Framer Motion'],
       highlight: true,
+      projectImage: '/Featured_Projects/portfolio-3d.jpg'
     },
     'Elgokh': {
       displayName: 'Elgokh',
@@ -73,6 +74,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['HTML5', 'CSS3', 'JavaScript', 'Responsive'],
       highlight: true,
+      projectImage: '/Featured_Projects/elgokh.jpg'
     },
     'Creative-child': {
       displayName: 'Creative Child',
@@ -80,6 +82,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['HTML5', 'CSS3', 'JavaScript', 'UI/UX'],
       highlight: true,
+      projectImage: '/Featured_Projects/creative-child.jpg'
     },
     'intiative_Website_Value': {
       displayName: 'Initiative Website - Value Marketing',
@@ -87,6 +90,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['React', 'JavaScript', 'CSS3', 'Responsive'],
       highlight: true,
+      projectImage: '/Featured_Projects/value-marketing.jpg'
     },
     'SBS-Website-Clone': {
       displayName: 'Shabab Betesaed Shabab Website',
@@ -94,6 +98,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['React', 'TypeScript', 'CSS3', 'Volunteer'],
       highlight: true,
+      projectImage: '/Featured_Projects/sbs-website.jpg'
     },
     'Green-studio': {
       displayName: 'Green Studio',
@@ -101,6 +106,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['HTML5', 'CSS3', 'JavaScript', 'Design'],
       highlight: true,
+      projectImage: '/Featured_Projects/green-studio.jpg'
     },
     'Family': {
       displayName: 'Family',
@@ -108,6 +114,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['HTML5', 'CSS3', 'JavaScript', 'Responsive'],
       highlight: true,
+      projectImage: '/Featured_Projects/family.jpg'
     },
     'VivaDecor': {
       displayName: 'Viva Decor',
@@ -115,6 +122,7 @@ export const projectsConfig = {
       featured: true,
       tags: ['HTML5', 'CSS3', 'JavaScript', 'Design'],
       highlight: true,
+      projectImage: '/Featured_Projects/viva-decor.jpg'
     },
     'jadoo': {
       displayName: 'Jadoo Travel Website',

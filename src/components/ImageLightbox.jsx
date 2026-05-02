@@ -97,7 +97,7 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
               />
 
               {/* Image glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 via-transparent to-pink-500/20 rounded-2xl pointer-events-none blur-3xl -z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-600/20 via-transparent to-cyan-700/20 rounded-2xl pointer-events-none blur-3xl -z-10" />
             </motion.div>
           </AnimatePresence>
 
@@ -159,7 +159,7 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
                   }}
                   className={`relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden flex-shrink-0 transition-all ${
                     index === currentIndex
-                      ? 'ring-2 ring-purple-400 ring-offset-2 ring-offset-black/50'
+                      ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-black/50'
                       : 'opacity-50 hover:opacity-100'
                   }`}
                 >
@@ -172,7 +172,7 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
                   {index === currentIndex && (
                     <motion.div
                       layoutId="activeThumbnail"
-                      className="absolute inset-0 border-2 border-purple-400 rounded-lg"
+                      className="absolute inset-0 border-2 border-cyan-400 rounded-lg"
                     />
                   )}
                 </motion.button>
@@ -202,3 +202,11 @@ export default function ImageLightbox({ images, isOpen, onClose, initialIndex = 
     </AnimatePresence>
   );
 }
+
+
+
+
+
+
+
+

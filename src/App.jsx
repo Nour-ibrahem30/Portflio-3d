@@ -5,6 +5,8 @@ import PageLoader from './components/PageLoader';
 import SEO from './components/SEO';
 import Navigation from './components/Navigation';
 import HeroSection from './components/Hero3D';
+import { getCSSGradient, getGradient } from './config/colorsConfig';
+import usePerformance from './hooks/usePerformance';
 import './index.css';
 
 // Lazy load heavy components
@@ -18,13 +20,16 @@ const ContactSection = lazy(() => import('./components/ContactSection'));
 // Loading fallback component
 const SectionLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+    <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#3b82f6', borderTopColor: 'transparent' }} />
   </div>
 );
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  
+  usePerformance();
 
   useEffect(() => {
     // Smooth scroll
@@ -56,6 +61,10 @@ function App() {
               }
             }
           }
+          
+          // Update back to top button visibility
+          setShowBackToTop(window.scrollY > 200);
+          
           ticking = false;
         });
         ticking = true;
@@ -93,8 +102,8 @@ function App() {
           className="fixed top-20 left-6 z-50"
         >
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
-            <div className="relative px-4 py-2 bg-zinc-900 border border-purple-500/50 rounded-full backdrop-blur-xl shadow-lg flex items-center gap-2">
+            <div className="absolute inset-0 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: getCSSGradient(1) }} />
+            <div className="relative px-4 py-2 bg-zinc-900 rounded-full backdrop-blur-xl shadow-lg flex items-center gap-2" style={{ borderWidth: '1px', borderColor: '#3b82f650' }}>
               <motion.div
                 animate={{
                   scale: [1, 1.2, 1],
@@ -104,10 +113,11 @@ function App() {
                   duration: 2,
                   repeat: Infinity,
                 }}
-                className="w-2 h-2 bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50"
+                className="w-2 h-2 rounded-full shadow-lg"
+                style={{ backgroundColor: '#4ca1af', boxShadow: '0 0 10px rgba(76, 161, 175, 0.5)' }}
               />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                Beta v 0.2.20
+                v 1.0.0
               </span>
             </div>
           </div>
@@ -120,15 +130,20 @@ function App() {
         <motion.button
           initial={{ opacity: 0, scale: 0 }}
           animate={{ 
-            opacity: activeSection !== 'home' ? 1 : 0,
-            scale: activeSection !== 'home' ? 1 : 0
+            opacity: showBackToTop ? 1 : 0,
+            scale: showBackToTop ? 1 : 0
           }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="fixed bottom-8 right-8 z-40 w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/70 transition-all"
+          className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+          style={{ 
+            background: getCSSGradient(1),
+            boxShadow: '0 10px 25px rgba(32, 58, 67, 0.5)'
+          }}
+          aria-label="Back to top"
         >
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -164,7 +179,7 @@ function App() {
         <footer className="relative z-10 py-12 px-6 text-center border-t border-gray-900 bg-black">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: getCSSGradient(1) }}>
                 Nour Ibrahem
               </div>
               
@@ -173,7 +188,10 @@ function App() {
                   href="https://github.com/Nour-ibrahem30"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-purple-400 transition-colors"
+                  className="text-gray-600 transition-colors"
+                  style={{ '--hover-color': '#3b82f6' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#3b82f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = ''}
                   aria-label="GitHub"
                 >
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -184,7 +202,9 @@ function App() {
                   href="https://linkedin.com/in/nour-ibrahem-499172346"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-purple-400 transition-colors"
+                  className="text-gray-600 transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#3b82f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = ''}
                   aria-label="LinkedIn"
                 >
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -193,7 +213,9 @@ function App() {
                 </a>
                 <a
                   href="mailto:nouribrahem207@gmail.com"
-                  className="text-gray-600 hover:text-purple-400 transition-colors"
+                  className="text-gray-600 transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#3b82f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = ''}
                   aria-label="Email"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,7 +229,7 @@ function App() {
               © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
             </p>
             <p className="text-gray-700 text-xs mt-2">
-              Beta v 0.2.20 — Work in Progress
+              v 1.0.0 — Production Ready
             </p>
           </div>
         </footer>
@@ -217,3 +239,12 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
+
+

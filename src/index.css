@@ -54,12 +54,12 @@ html::-webkit-scrollbar {
 /* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+  scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
 }
 
 body {
   scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+  scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
 }
 
 
@@ -108,18 +108,18 @@ a, button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a855f7, #ec4899);
+  background: linear-gradient(180deg, #1e3a8a, #3b82f6);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9333ea, #db2777);
+  background: linear-gradient(180deg, #1e3a8a, #3b82f6);
 }
 
 /* Text selection */
 ::selection {
-  background: rgba(168, 85, 247, 0.3);
-  color: #fff;
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
 }
 
 /* Line clamp utilities */
@@ -395,4 +395,9 @@ video::-webkit-media-controls-enclosure {
 video::-webkit-media-controls-panel {
   background: transparent;
 }
+
+
+
+
+
 

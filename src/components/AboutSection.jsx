@@ -48,9 +48,9 @@ export default function AboutSection() {
       title: 'React Development',
       desc: 'Creating interactive, component-based user interfaces with React and TypeScript for scalable, maintainable applications with state management',
       icon: '⚛️',
-      gradient: 'from-purple-500 via-pink-500 to-rose-500',
+      gradient: 'from-slate-600 via-cyan-700 to-blue-700',
       skills: ['React', 'TypeScript', 'Redux', 'Hooks', 'Context API'],
-      color: 'purple'
+      color: 'slate'
     },
     {
       number: '03',
@@ -69,11 +69,11 @@ export default function AboutSection() {
       <div className="absolute inset-0 opacity-20">
         <motion.div
           style={{ y }}
-          className="absolute top-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+          className="absolute top-20 right-20 w-96 h-96 bg-slate-600/30 rounded-full blur-3xl"
         />
         <motion.div
           style={{ y: useTransform(scrollYProgress, [0, 1], [-100, 100]) }}
-          className="absolute bottom-20 left-20 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl"
+          className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-700/30 rounded-full blur-3xl"
         />
       </div>
 
@@ -81,8 +81,8 @@ export default function AboutSection() {
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
           backgroundImage: `
-            linear-gradient(rgba(168, 85, 247, 0.5) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(168, 85, 247, 0.5) 1px, transparent 1px)
+            linear-gradient(rgba(71, 85, 105, 0.5) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(71, 85, 105, 0.5) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
         }}></div>
@@ -98,7 +98,7 @@ export default function AboutSection() {
           >
             <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
               <div>ABOUT</div>
-              <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <div className="bg-gradient-to-r from-slate-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
                 ME
               </div>
             </h2>
@@ -106,7 +106,7 @@ export default function AboutSection() {
               initial={{ width: 0 }}
               animate={isInView ? { width: '200px' } : { width: 0 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+              className="h-1 bg-gradient-to-r from-slate-600 to-cyan-700 rounded-full"
             />
           </motion.div>
         </div>
@@ -122,11 +122,11 @@ export default function AboutSection() {
           >
             <motion.div
               whileHover={{ x: 10 }}
-              className="relative pl-6 border-l-4 border-purple-500"
+              className="relative pl-6 border-l-4 border-slate-600"
             >
               <p className="text-3xl md:text-4xl text-gray-300 leading-relaxed font-light">
                 Front-End Developer passionate about building{' '}
-                <span className="text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text font-semibold">
+                <span className="text-transparent bg-gradient-to-r from-slate-400 to-cyan-600 bg-clip-text font-semibold">
                   clean, responsive, and user-friendly
                 </span>{' '}
                 web interfaces.
@@ -157,10 +157,10 @@ export default function AboutSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ delay: 0.8 }}
-              className="relative p-6 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-2xl backdrop-blur-sm overflow-hidden group"
+              className="relative p-6 bg-gradient-to-r from-slate-600/10 to-cyan-700/10 border border-slate-600/30 rounded-2xl backdrop-blur-sm overflow-hidden group"
             >
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
+                className="absolute inset-0 bg-gradient-to-r from-slate-600/20 to-cyan-700/20"
                 animate={{
                   x: ['-100%', '100%'],
                 }}
@@ -171,7 +171,7 @@ export default function AboutSection() {
                 }}
               />
               <div className="relative">
-                <svg className="w-8 h-8 text-purple-400 mb-3" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-cyan-400 mb-3" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
                 <p className="text-gray-300 italic text-lg">
@@ -191,7 +191,7 @@ export default function AboutSection() {
           >
             {[
               { label: 'EXPERIENCE', value: '2+ Years', icon: '💼', color: 'from-blue-500 to-cyan-500' },
-              { label: 'PROJECTS', value: '20+ Websites', icon: '🚀', color: 'from-purple-500 to-pink-500' },
+              { label: 'PROJECTS', value: '20+ Websites', icon: '🚀', color: 'from-slate-600 to-cyan-700' },
               { label: 'EDUCATION', value: 'GPA 3.0/4.0', icon: '🎓', color: 'from-green-500 to-emerald-500' },
             ].map((stat, index) => (
               <motion.div
@@ -202,7 +202,7 @@ export default function AboutSection() {
                 whileHover={{ scale: 1.02, x: 10 }}
                 className="relative group"
               >
-                <div className="relative p-8 bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-purple-500/50 transition-all overflow-hidden">
+                <div className="relative p-8 bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all overflow-hidden">
                   {/* Gradient Background */}
                   <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                   
@@ -220,14 +220,14 @@ export default function AboutSection() {
                       <div className="text-sm text-gray-600 uppercase tracking-widest mb-2">
                         {stat.label}
                       </div>
-                      <div className="text-4xl font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-400 group-hover:to-pink-400 transition-all">
+                      <div className="text-4xl font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-slate-400 group-hover:to-cyan-600 transition-all">
                         {stat.value}
                       </div>
                     </div>
 
                     {/* Arrow */}
                     <motion.svg
-                      className="w-6 h-6 text-gray-600 group-hover:text-purple-400"
+                      className="w-6 h-6 text-gray-600 group-hover:text-cyan-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -286,7 +286,7 @@ export default function AboutSection() {
                 <motion.div
                   whileHover={{ y: -20, rotateX: 5, rotateY: 5 }}
                   transition={{ duration: 0.3 }}
-                  className="relative h-full p-8 bg-zinc-900/50 backdrop-blur-sm rounded-3xl border border-zinc-800 hover:border-purple-500/50 transition-all overflow-hidden transform-gpu perspective-1000"
+                  className="relative h-full p-8 bg-zinc-900/50 backdrop-blur-sm rounded-3xl border border-zinc-800 hover:border-slate-600/50 transition-all overflow-hidden transform-gpu perspective-1000"
                   style={{
                     transformStyle: 'preserve-3d',
                   }}
@@ -302,11 +302,11 @@ export default function AboutSection() {
 
                   {/* Number Badge */}
                   <motion.div
-                    className="absolute top-6 right-6 w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center border border-zinc-700 group-hover:border-purple-500/50 transition-all"
+                    className="absolute top-6 right-6 w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center border border-zinc-700 group-hover:border-slate-600/50 transition-all"
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <span className="text-2xl font-bold text-gray-600 group-hover:text-purple-400 transition-colors">
+                    <span className="text-2xl font-bold text-gray-600 group-hover:text-cyan-400 transition-colors">
                       {service.number}
                     </span>
                   </motion.div>
@@ -325,7 +325,7 @@ export default function AboutSection() {
 
                   {/* Content */}
                   <div className="relative z-10">
-                    <h4 className="text-2xl font-bold text-white mb-4 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-400 group-hover:to-pink-400 transition-all">
+                    <h4 className="text-2xl font-bold text-white mb-4 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-slate-400 group-hover:to-cyan-600 transition-all">
                       {service.title}
                     </h4>
                     
@@ -342,7 +342,7 @@ export default function AboutSection() {
                           animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
                           transition={{ delay: 1.2 + index * 0.2 + i * 0.1 }}
                           whileHover={{ scale: 1.1, y: -2 }}
-                          className="px-3 py-1 bg-zinc-800/50 text-gray-400 rounded-full text-xs font-medium border border-zinc-700 hover:border-purple-500/50 hover:text-purple-400 transition-all cursor-default"
+                          className="px-3 py-1 bg-zinc-800/50 text-gray-400 rounded-full text-xs font-medium border border-zinc-700 hover:border-slate-600/50 hover:text-cyan-400 transition-all cursor-default"
                         >
                           {skill}
                         </motion.span>
@@ -351,7 +351,7 @@ export default function AboutSection() {
                   </div>
 
                   {/* Decorative Elements */}
-                  <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-500/10 to-transparent rounded-tl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-slate-600/10 to-transparent rounded-tl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   {/* Shine Effect */}
                   <motion.div
@@ -363,8 +363,8 @@ export default function AboutSection() {
                   />
 
                   {/* Corner Accent */}
-                  <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-purple-500/20 rounded-tl-3xl group-hover:border-purple-500/50 transition-colors" />
-                  <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-purple-500/20 rounded-br-3xl group-hover:border-purple-500/50 transition-colors" />
+                  <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-slate-600/20 rounded-tl-3xl group-hover:border-slate-600/50 transition-colors" />
+                  <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-slate-600/20 rounded-br-3xl group-hover:border-slate-600/50 transition-colors" />
                 </motion.div>
               </motion.div>
             ))}
@@ -374,3 +374,11 @@ export default function AboutSection() {
     </section>
   );
 }
+
+
+
+
+
+
+
+

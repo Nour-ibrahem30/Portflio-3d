@@ -17,7 +17,7 @@ const skillCategories = [
   },
   {
     title: 'Development',
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-slate-600 to-cyan-700',
     skills: [
       { name: 'Responsive Design', level: 95 },
       { name: 'Mobile-First', level: 90 },
@@ -101,7 +101,7 @@ export default function SkillsSection() {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+          className="absolute bottom-20 right-20 w-96 h-96 bg-slate-600/30 rounded-full blur-3xl"
         />
       </div>
 
@@ -115,7 +115,7 @@ export default function SkillsSection() {
         >
           <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
             <div>SKILLS &</div>
-            <div className="bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
+            <div className="bg-gradient-to-r from-blue-400 via-cyan-400 to-slate-400 bg-clip-text text-transparent">
               EXPERTISE
             </div>
           </h2>
@@ -127,7 +127,7 @@ export default function SkillsSection() {
             whileInView={{ width: '200px' }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-4"
+            className="h-1 bg-gradient-to-r from-blue-500 to-slate-600 rounded-full mt-4"
           />
         </motion.div>
 
@@ -143,7 +143,7 @@ export default function SkillsSection() {
               whileHover={{ y: -10, scale: 1.02 }}
               className="relative group"
             >
-              <div className="relative bg-zinc-900/90 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700 hover:border-purple-500/50 overflow-hidden transition-all duration-300 shadow-xl">
+              <div className="relative bg-zinc-900/90 backdrop-blur-sm rounded-2xl p-8 border border-zinc-700 hover:border-slate-600/50 overflow-hidden transition-all duration-300 shadow-xl">
                 {/* Gradient overlay on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
                 
@@ -203,3 +203,11 @@ export default function SkillsSection() {
     </section>
   );
 }
+
+
+
+
+
+
+
+

@@ -76,7 +76,7 @@ export default function TimelineSectionEnhanced() {
 
         <div className="relative overflow-visible">
           {/* Timeline line */}
-          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 via-pink-500 to-blue-500 rounded-full shadow-lg shadow-purple-500/50" />
+          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-900 via-slate-700 to-cyan-800 rounded-full shadow-lg shadow-slate-600/50" />
 
           {/* Timeline items */}
           <div className="space-y-16 overflow-visible">
@@ -143,7 +143,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
           onClick={togglePopup}
         >
           {/* Card */}
-          <div className="relative bg-zinc-900/90 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700 hover:border-purple-500/50 overflow-hidden transition-all duration-300 shadow-xl">
+          <div className="relative bg-zinc-900/90 backdrop-blur-sm p-8 rounded-2xl border border-zinc-700 hover:border-slate-600/50 overflow-hidden transition-all duration-300 shadow-xl">
             {/* Gradient overlay */}
             <div className={`absolute inset-0 bg-gradient-to-br ${typeColors[entry.type]} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
             
@@ -159,11 +159,11 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                 </div>
               </div>
 
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-400 group-hover:to-pink-400 transition-all">
+              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-slate-400 group-hover:to-cyan-600 transition-all">
                 {entry.title}
               </h3>
               
-              <p className="text-purple-400 mb-1 font-semibold">
+              <p className="text-cyan-400 mb-1 font-semibold">
                 {entry.company}
               </p>
               
@@ -182,7 +182,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                 }`}>
                   {Object.entries(entry.stats).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-2 text-sm">
-                      <span className="text-purple-400 font-bold">{value}</span>
+                      <span className="text-cyan-400 font-bold">{value}</span>
                       <span className="text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
                     </div>
                   ))}
@@ -196,7 +196,7 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                 {entry.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="px-3 py-1 bg-zinc-800 text-gray-300 rounded-full text-xs font-medium border border-gray-700 hover:border-purple-500 transition-colors"
+                    className="px-3 py-1 bg-zinc-800 text-gray-300 rounded-full text-xs font-medium border border-gray-700 hover:border-slate-600 transition-colors"
                   >
                     {skill}
                   </span>
@@ -217,8 +217,8 @@ function TimelineEntry({ entry, index, isSelected, onInteraction, isMobile, onOp
                     <div
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                         isPopupOpen 
-                          ? 'bg-purple-500 text-white' 
-                          : 'bg-purple-500/20 text-purple-400'
+                          ? 'bg-slate-600 text-white' 
+                          : 'bg-slate-600/20 text-cyan-400'
                       }`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="bg-zinc-900 border border-purple-500/50 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl relative w-full">
+      <div className="bg-zinc-900 border border-slate-600/50 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl relative w-full">
         {/* Close Button */}
         <button
           onClick={(e) => {
@@ -368,7 +368,7 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
                   }}
                   className={`w-2 h-2 rounded-full transition-all ${
                     idx === currentPhotoIndex 
-                      ? 'bg-purple-400 w-4' 
+                      ? 'bg-slate-500 w-4' 
                       : 'bg-white/50 hover:bg-white/70'
                   }`}
                   aria-label={`View photo ${idx + 1}`}
@@ -386,22 +386,28 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
           {entry.projects.length > 0 && (
             <div className="mb-4">
               <h4 className="text-white font-bold mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                 </svg>
                 Projects ({entry.projects.length})
               </h4>
               <div className="space-y-2">
                 {entry.projects.map((projectName) => (
-                  <div
+                  <a
                     key={projectName}
-                    className="flex items-center gap-2 text-sm text-gray-300 hover:text-purple-400 transition-colors"
+                    href={`https://github.com/Nour-ibrahem30/${projectName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-gray-300 hover:text-cyan-400 transition-colors group"
                   >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
                     </svg>
-                    <span>{projectName}</span>
-                  </div>
+                    <span className="group-hover:underline">{projectName}</span>
+                    <svg className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
                 ))}
               </div>
             </div>
@@ -464,7 +470,7 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
                 <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                 </svg>
-                <span className="text-purple-400 font-semibold">{entry.stats.wordpressSites} WordPress Websites</span>
+                <span className="text-cyan-400 font-semibold">{entry.stats.wordpressSites} WordPress Websites</span>
               </div>
             </div>
           )}
@@ -473,8 +479,16 @@ function ProjectsPopup({ entry, position, onOpenLightbox, isVisible, onClose }) 
         {/* Arrow pointer */}
         <div className={`absolute -top-2 ${
           position === 'right' ? 'md:right-8 left-8' : 'md:left-8 left-8'
-        } w-4 h-4 bg-zinc-900 border-t border-l border-purple-500/50 transform rotate-45`}></div>
+        } w-4 h-4 bg-zinc-900 border-t border-l border-slate-600/50 transform rotate-45`}></div>
       </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+

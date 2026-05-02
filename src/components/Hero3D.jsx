@@ -122,7 +122,7 @@ function HeroConstellation({ children }) {
 
           if (distance < connectionDistance) {
             const opacity = (1 - distance / connectionDistance) * 0.35;
-            ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+            ctx.strokeStyle = `rgba(71, 85, 105, ${opacity})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(star1.x, star1.y);
@@ -236,8 +236,8 @@ export default function Hero3D() {
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(168, 85, 247, 0.15) 1px, transparent 1px)
+              linear-gradient(rgba(71, 85, 105, 0.15) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(71, 85, 105, 0.15) 1px, transparent 1px)
             `,
             backgroundSize: '100px 100px',
             transform: `perspective(1000px) rotateX(60deg) translateZ(-200px)`,
@@ -254,8 +254,8 @@ export default function Hero3D() {
           whileHover={{ scale: 1.05 }}
         >
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-            <div className="relative px-6 py-2.5 bg-zinc-900 border border-purple-500/50 rounded-full backdrop-blur-xl shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-cyan-700 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
+            <div className="relative px-6 py-2.5 bg-zinc-900 border border-slate-600/50 rounded-full backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-2.5">
                 <motion.div
                   animate={{
@@ -291,7 +291,7 @@ export default function Hero3D() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               style={{
-                background: 'linear-gradient(90deg, #c084fc 0%, #ec4899 100%)',
+                background: 'linear-gradient(90deg, #c084fc 0%, #22d3ee 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -306,7 +306,7 @@ export default function Hero3D() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               style={{
-                background: 'linear-gradient(90deg, #ec4899 0%, #a855f7 50%, #60a5fa 100%)',
+                background: 'linear-gradient(90deg, #22d3ee 0%, #475569 50%, #60a5fa 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -354,7 +354,7 @@ export default function Hero3D() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-700 to-cyan-800" />
             <div className="relative z-10 flex items-center gap-2 text-white font-semibold uppercase tracking-wider text-sm">
               <span>View Work</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,12 +365,12 @@ export default function Hero3D() {
 
           <motion.a
             href="#contact"
-            className="hero-cta group relative px-8 py-4 border border-purple-500/50 rounded-full overflow-hidden"
+            className="hero-cta group relative px-8 py-4 border border-slate-600/50 rounded-full overflow-hidden"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <div className="absolute inset-0 bg-purple-500/10" />
-            <div className="relative z-10 flex items-center gap-2 text-purple-400 font-semibold uppercase tracking-wider text-sm">
+            <div className="absolute inset-0 bg-slate-600/10" />
+            <div className="relative z-10 flex items-center gap-2 text-cyan-400 font-semibold uppercase tracking-wider text-sm">
               <span>Get In Touch</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -450,3 +450,11 @@ export default function Hero3D() {
     </motion.section>
   );
 }
+
+
+
+
+
+
+
+

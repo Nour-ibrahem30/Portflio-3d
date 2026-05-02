@@ -20,24 +20,37 @@ export default function ProjectsSectionEnhanced() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
+        console.log('🔄 Starting to fetch projects...');
+        
         const headers = { 'Accept': 'application/vnd.github.v3+json' };
         
         const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
         if (githubToken) {
           headers['Authorization'] = `token ${githubToken}`;
+          console.log('✅ GitHub token found');
+        } else {
+          console.log('⚠️ No GitHub token found - using public API (rate limited)');
         }
         
+        console.log('📡 Fetching repositories from GitHub...');
         const reposResponse = await fetch(
           'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100',
           { headers }
         );
         
+        console.log('📊 GitHub API Response Status:', reposResponse.status);
+        
         if (!reposResponse.ok) {
-          throw new Error(`GitHub API error: ${reposResponse.status}`);
+          const errorText = await reposResponse.text();
+          console.error('❌ GitHub API Error:', reposResponse.status, errorText);
+          throw new Error(`GitHub API error: ${reposResponse.status} - ${errorText}`);
         }
         
         const repos = await reposResponse.json();
+        console.log('📦 Total repositories fetched:', repos.length);
+        
         const ownRepos = repos.filter(repo => !repo.fork);
+        console.log('🏠 Own repositories (non-forks):', ownRepos.length);
         
         // Add local projects
         const localProjects = [];
@@ -61,6 +74,8 @@ export default function ProjectsSectionEnhanced() {
           }
         });
         
+        console.log('🏠 Local projects added:', localProjects.length);
+        
         const allRepos = [...localProjects, ...ownRepos];
         
         // Fetch README and images for each repo
@@ -76,6 +91,19 @@ export default function ProjectsSectionEnhanced() {
               // Use first image or video thumbnail from local folder
               projectImage = `${mediaPath}/2.jpg`;
               description = override.customDescription || description;
+              
+              return {
+                ...repo,
+                readme: description,
+                projectImage: projectImage
+              };
+            }
+            
+            // Use local image if available in overrides (PRIORITY)
+            if (override?.projectImage) {
+              projectImage = override.projectImage;
+              description = override.customDescription || description;
+              console.log(`📸 Using local image for ${repo.name}:`, projectImage);
               
               return {
                 ...repo,
@@ -155,6 +183,8 @@ export default function ProjectsSectionEnhanced() {
               
             } catch (error) {
               console.log(`Could not fetch data for ${repo.name}`);
+              // Use GitHub OpenGraph as fallback
+              projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
             }
             
             return {
@@ -169,11 +199,115 @@ export default function ProjectsSectionEnhanced() {
         const projectsWithOverrides = projectsWithData.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
         
+        console.log('📋 Organized projects:', {
+          featured: organized.featured.length,
+          other: organized.other.length,
+          archived: organized.archived.length
+        });
+        
         setAllProjects(organized);
         setLoading(false);
+        console.log('✅ Projects loaded successfully!');
       } catch (err) {
-        console.error('Error fetching projects:', err);
-        setAllProjects({ featured: [], other: [], archived: [] });
+        console.error('❌ Error fetching projects:', err);
+        console.error('📝 Error details:', err.message);
+        
+        // Fallback: show only local projects if GitHub fails
+        console.log('🔄 Falling back to local projects only...');
+        const localProjects = [];
+        Object.keys(projectsConfig.overrides).forEach(projectName => {
+          const override = projectsConfig.overrides[projectName];
+          if (override.isLocalProject) {
+            localProjects.push({
+              id: `local-${projectName}`,
+              name: projectName,
+              full_name: `local/${projectName}`,
+              description: override.customDescription || '',
+              html_url: override.liveUrl || '#',
+              homepage: override.liveUrl || '#',
+              stargazers_count: 0,
+              forks_count: 0,
+              language: override.tags?.[0] || 'Media',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              default_branch: 'main',
+            });
+          }
+        });
+        
+        // Add static projects as fallback
+        const staticFallbackProjects = [
+          {
+            id: 'portfolio-3d-fallback',
+            name: 'Portflio-3d',
+            full_name: 'Nour-ibrahem30/Portflio-3d',
+            description: 'Modern 3D portfolio website with interactive animations, built with React and Vite',
+            html_url: 'https://github.com/Nour-ibrahem30/Portflio-3d',
+            homepage: 'https://nour-ibrahem30.github.io/Portflio-3d/',
+            stargazers_count: 5,
+            forks_count: 2,
+            language: 'JavaScript',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: new Date().toISOString(),
+            default_branch: 'main',
+            projectImage: '/Featured_Projects/portfolio-3d.jpg',
+            readme: 'Modern 3D portfolio website with interactive animations, built with React, Vite, and Tailwind CSS. Features dynamic GitHub API integration and smooth GSAP animations.'
+          },
+          {
+            id: 'elgokh-fallback',
+            name: 'Elgokh',
+            full_name: 'Nour-ibrahem30/Elgokh',
+            description: 'Professional website project showcasing modern web development techniques',
+            html_url: 'https://github.com/Nour-ibrahem30/Elgokh',
+            homepage: '',
+            stargazers_count: 3,
+            forks_count: 1,
+            language: 'HTML',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: new Date().toISOString(),
+            default_branch: 'main',
+            projectImage: '/Featured_Projects/elgokh.jpg',
+            readme: 'Professional website project showcasing modern web development techniques and responsive design.'
+          },
+          {
+            id: 'creative-child-fallback',
+            name: 'Creative-child',
+            full_name: 'Nour-ibrahem30/Creative-child',
+            description: 'Creative and colorful website designed for children',
+            html_url: 'https://github.com/Nour-ibrahem30/Creative-child',
+            homepage: '',
+            stargazers_count: 2,
+            forks_count: 0,
+            language: 'CSS',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: new Date().toISOString(),
+            default_branch: 'main',
+            projectImage: '/Featured_Projects/creative-child.jpg',
+            readme: 'Creative and colorful website designed for children, featuring interactive elements and engaging UI.'
+          },
+          {
+            id: 'value-marketing-fallback',
+            name: 'intiative_Website_Value',
+            full_name: 'Nour-ibrahem30/intiative_Website_Value',
+            description: 'Custom React website built for Value Marketing company',
+            html_url: 'https://github.com/Nour-ibrahem30/intiative_Website_Value',
+            homepage: '',
+            stargazers_count: 1,
+            forks_count: 0,
+            language: 'React',
+            created_at: '2024-01-01T00:00:00Z',
+            updated_at: new Date().toISOString(),
+            default_branch: 'main',
+            projectImage: '/Featured_Projects/value-marketing.jpg',
+            readme: 'Custom React website built for Value Marketing company. Features modern design, responsive layout, and smooth animations.'
+          }
+        ];
+        
+        const fallbackProjects = [...localProjects, ...staticFallbackProjects];
+        const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
+        const organized = organizeProjects(projectsWithOverrides);
+        
+        setAllProjects(organized);
         setLoading(false);
       }
     };
@@ -215,7 +349,7 @@ export default function ProjectsSectionEnhanced() {
         <motion.div
           animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+          className="absolute top-20 right-20 w-96 h-96 bg-slate-600/30 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ scale: [1.2, 1, 1.2], rotate: [0, -90, 0] }}
@@ -234,7 +368,7 @@ export default function ProjectsSectionEnhanced() {
           >
             <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
               <div>SELECTED</div>
-              <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <div className="bg-gradient-to-r from-slate-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 PROJECTS
               </div>
             </h2>
@@ -245,7 +379,7 @@ export default function ProjectsSectionEnhanced() {
               initial={{ width: 0 }}
               animate={isInView ? { width: '200px' } : { width: 0 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full mt-4"
+              className="h-1 bg-gradient-to-r from-slate-600 via-blue-500 to-cyan-500 rounded-full mt-4"
             />
           </motion.div>
         </div>
@@ -271,9 +405,13 @@ export default function ProjectsSectionEnhanced() {
                   }}
                   className={`relative px-6 py-3 rounded-xl font-semibold uppercase tracking-wider text-sm transition-all duration-300 ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+                      ? 'text-white shadow-lg'
                       : 'bg-zinc-900/50 text-gray-400 hover:text-white hover:bg-zinc-800 border border-zinc-700'
                   }`}
+                  style={activeTab === tab.id ? {
+                    background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                    boxShadow: '0 10px 25px rgba(38, 208, 206, 0.5)'
+                  } : {}}
                 >
                   <span className="flex items-center gap-2">
                     <span>{tab.icon}</span>
@@ -290,7 +428,8 @@ export default function ProjectsSectionEnhanced() {
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl -z-10"
+                      className="absolute inset-0 rounded-xl -z-10"
+                      style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -307,8 +446,8 @@ export default function ProjectsSectionEnhanced() {
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
             >
-              <div className="absolute inset-0 border-4 border-purple-500/30 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-transparent border-t-purple-500 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-slate-600/30 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-transparent border-t-slate-600 rounded-full"></div>
             </motion.div>
           </div>
         ) : currentProjects.length === 0 ? (
@@ -335,7 +474,7 @@ export default function ProjectsSectionEnhanced() {
               className="text-center mb-12"
             >
               <p className="text-gray-400 text-lg">
-                Showing <span className="text-purple-400 font-bold">{Math.min(displayCount, currentProjects.length)}</span> of <span className="text-purple-400 font-bold">{currentProjects.length}</span> projects
+                Showing <span className="text-cyan-400 font-bold">{Math.min(displayCount, currentProjects.length)}</span> of <span className="text-cyan-400 font-bold">{currentProjects.length}</span> projects
               </p>
             </motion.div>
 
@@ -375,9 +514,9 @@ export default function ProjectsSectionEnhanced() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="group relative px-10 py-5 overflow-hidden rounded-full"
+                  style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)' }} />
                   <div className="relative z-10 flex items-center gap-3 text-white font-semibold uppercase tracking-wider">
                     <span>Load More Projects</span>
                     <motion.svg
@@ -414,7 +553,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       onMouseEnter={() => setHoveredIndex(index)}
       onMouseLeave={() => setHoveredIndex(null)}
       whileHover={{ y: -10 }}
-      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-purple-500/50 transition-all duration-300 shadow-xl"
+      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl"
     >
       {/* NEW or FEATURED Badge */}
       {(isNew || isHighlighted) && (
@@ -469,7 +608,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
           transition={{ duration: 2, repeat: hoveredIndex === index ? Infinity : 0 }}
         >
           {project.language && (
-            <span className="inline-block text-xs px-3 py-1 bg-black/50 backdrop-blur-sm text-purple-400 rounded-full uppercase tracking-wider border border-purple-500/30">
+            <span className="inline-block text-xs px-3 py-1 bg-black/50 backdrop-blur-sm text-cyan-400 rounded-full uppercase tracking-wider border border-slate-600/30">
               {project.language}
             </span>
           )}
@@ -481,7 +620,15 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <motion.h3 
-              className="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-purple-400 group-hover:to-pink-400 transition-all"
+              className="text-xl font-bold text-white mb-2 transition-all"
+              style={{
+                ...(hoveredIndex === index && {
+                  background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                })
+              }}
               animate={{ x: hoveredIndex === index ? 5 : 0 }}
               transition={{ duration: 0.3 }}
             >
@@ -497,7 +644,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
             transition={{ duration: 0.3 }}
             className="ml-4"
           >
-            <svg className="w-6 h-6 text-gray-600 group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-gray-600 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </motion.div>
@@ -510,7 +657,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
         <div className="flex items-center gap-6 text-sm text-gray-500 mb-4">
           <motion.span 
             className="flex items-center gap-2"
-            whileHover={{ scale: 1.15, color: '#a855f7' }}
+            whileHover={{ scale: 1.15, color: '#475569' }}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -519,7 +666,8 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
           </motion.span>
           <motion.span 
             className="flex items-center gap-2"
-            whileHover={{ scale: 1.15, color: '#a855f7' }}
+            whileHover={{ scale: 1.15 }}
+            style={{ color: hoveredIndex === index ? '#3b82f6' : undefined }}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
@@ -528,19 +676,23 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
           </motion.span>
         </div>
 
-        <motion.div
-          className="relative overflow-hidden rounded-lg"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-center font-medium text-sm group-hover:bg-purple-500/20 transition-colors">
-            View Project
-          </div>
-        </motion.div>
+          <motion.div
+            className="relative overflow-hidden rounded-lg"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="px-4 py-2 border text-center font-medium text-sm transition-colors" style={{
+              background: hoveredIndex === index ? 'rgba(38, 208, 206, 0.2)' : 'rgba(38, 208, 206, 0.1)',
+              borderColor: 'rgba(38, 208, 206, 0.3)',
+              color: '#3b82f6'
+            }}>
+              View Project
+            </div>
+          </motion.div>
       </div>
 
       <motion.div 
-        className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-slate-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         animate={{
           scale: hoveredIndex === index ? [1, 1.2, 1] : 1
         }}
@@ -551,7 +703,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       />
 
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl"></div>
+        <div className="absolute inset-0 rounded-2xl blur-xl" style={{ background: 'linear-gradient(135deg, rgba(26, 41, 128, 0.2) 0%, rgba(38, 208, 206, 0.2) 100%)' }}></div>
       </div>
 
       <a
@@ -564,3 +716,13 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
     </motion.div>
   );
 }
+
+
+
+
+
+
+
+
+
+

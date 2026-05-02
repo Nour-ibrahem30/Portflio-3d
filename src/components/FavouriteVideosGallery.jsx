@@ -61,12 +61,12 @@ export default function FavouriteVideosGallery() {
         <motion.div
           animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-20 right-20 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+          className="absolute top-20 right-20 w-96 h-96 bg-slate-600/30 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ scale: [1.2, 1, 1.2], rotate: [0, -90, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-20 left-20 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl"
+          className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-700/30 rounded-full blur-3xl"
         />
       </div>
 
@@ -80,7 +80,7 @@ export default function FavouriteVideosGallery() {
         >
           <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
             <div>GUIDING</div>
-            <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+            <div className="bg-gradient-to-r from-slate-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
               MOMENTS
             </div>
           </h2>
@@ -91,7 +91,7 @@ export default function FavouriteVideosGallery() {
             initial={{ width: 0 }}
             animate={{ width: '200px' }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full mt-4 mx-auto"
+            className="h-1 bg-gradient-to-r from-blue-900 via-slate-700 to-cyan-800 rounded-full mt-4 mx-auto"
           />
         </motion.div>
 
@@ -106,7 +106,7 @@ export default function FavouriteVideosGallery() {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               whileHover={{ y: -10 }}
-              className="group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-purple-500/50 transition-all duration-300 shadow-xl"
+              className="group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl"
             >
               {/* Video Container */}
               <div className="relative h-64 overflow-hidden bg-zinc-800">
@@ -117,7 +117,7 @@ export default function FavouriteVideosGallery() {
                       <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/95 z-10">
                         <div className="flex flex-col items-center gap-4">
                           <motion.div
-                            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
+                            className="w-16 h-16 border-4 border-slate-600 border-t-transparent rounded-full"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           />
@@ -174,7 +174,7 @@ export default function FavouriteVideosGallery() {
                       }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div className="w-20 h-20 rounded-full bg-purple-500/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-purple-500 transition-colors">
+                      <div className="w-20 h-20 rounded-full bg-slate-600/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-slate-600 transition-colors">
                         <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                         </svg>
@@ -199,7 +199,7 @@ export default function FavouriteVideosGallery() {
 
               {/* Glow Effect */}
               <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl"></div>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-slate-600/20 to-cyan-700/20 blur-xl"></div>
               </div>
             </motion.div>
           ))}
@@ -208,3 +208,11 @@ export default function FavouriteVideosGallery() {
     </section>
   );
 }
+
+
+
+
+
+
+
+

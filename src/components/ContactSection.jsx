@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import gsap from 'gsap';
-import MagneticButton from './MagneticButton';
 import { db } from '../firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -90,7 +89,7 @@ export default function ContactSection() {
       label: 'GitHub',
       value: '@Nour-ibrahem30',
       href: 'https://github.com/Nour-ibrahem30',
-      gradient: 'from-purple-500 to-pink-500'
+      gradient: 'from-slate-600 to-cyan-700'
     },
     {
       icon: (
@@ -123,7 +122,7 @@ export default function ContactSection() {
       label: 'LinkedIn',
       value: 'Nour Ibrahem',
       href: 'https://linkedin.com/in/nour-ibrahem-499172346',
-      gradient: 'from-indigo-500 to-purple-500'
+      gradient: 'from-blue-700 to-slate-700'
     }
   ];
 
@@ -131,8 +130,8 @@ export default function ContactSection() {
     <section id="contact" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-black w-full">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-20 left-10 w-96 h-96 bg-slate-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-700/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
@@ -152,7 +151,7 @@ export default function ContactSection() {
           >
             <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
               <div>LET'S</div>
-              <div className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+              <div className="bg-gradient-to-r from-slate-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
                 CONNECT
               </div>
             </h2>
@@ -186,13 +185,13 @@ export default function ContactSection() {
                   animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                   whileHover={{ scale: 1.02, x: 10 }}
-                  className="group relative block p-6 bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-purple-500/50 transition-all duration-300 overflow-hidden"
+                  className="group relative block p-6 bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 overflow-hidden"
                 >
                   {/* Gradient Background on Hover */}
                   <div className={`absolute inset-0 bg-gradient-to-r ${method.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                   
                   {/* Decorative Corner */}
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-slate-600/10 to-transparent rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   <div className="relative flex items-center gap-4">
                     {/* Icon Container */}
@@ -209,14 +208,14 @@ export default function ContactSection() {
                       <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">
                         {method.label}
                       </div>
-                      <div className="text-white font-medium truncate group-hover:text-purple-400 transition-colors">
+                      <div className="text-white font-medium truncate group-hover:text-cyan-400 transition-colors">
                         {method.value}
                       </div>
                     </div>
 
                     {/* Arrow Icon */}
                     <motion.svg
-                      className="w-5 h-5 text-gray-600 group-hover:text-purple-400"
+                      className="w-5 h-5 text-gray-600 group-hover:text-cyan-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -243,11 +242,11 @@ export default function ContactSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="mt-8 p-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/20"
+              className="mt-8 p-6 bg-gradient-to-br from-slate-600/10 to-cyan-700/10 rounded-2xl border border-slate-600/20"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 bg-slate-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -290,11 +289,11 @@ export default function ContactSection() {
                     onBlur={() => setFocusedField(null)}
                     required
                     placeholder="Enter your name"
-                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 backdrop-blur-sm"
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-slate-600 focus:outline-none transition-all duration-300 backdrop-blur-sm"
                   />
                   {focusedField === 'name' && (
                     <motion.div
-                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      className="absolute inset-0 border-2 border-slate-600 rounded-xl pointer-events-none"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -323,11 +322,11 @@ export default function ContactSection() {
                     onBlur={() => setFocusedField(null)}
                     required
                     placeholder="Enter your email"
-                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 backdrop-blur-sm"
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-slate-600 focus:outline-none transition-all duration-300 backdrop-blur-sm"
                   />
                   {focusedField === 'email' && (
                     <motion.div
-                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      className="absolute inset-0 border-2 border-slate-600 rounded-xl pointer-events-none"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -356,11 +355,11 @@ export default function ContactSection() {
                     required
                     rows="6"
                     placeholder="Tell me about your project..."
-                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-purple-500 focus:outline-none transition-all duration-300 resize-none backdrop-blur-sm"
+                    className="w-full px-6 py-4 bg-zinc-900/50 border-2 border-zinc-800 rounded-xl text-white placeholder-gray-600 focus:border-slate-600 focus:outline-none transition-all duration-300 resize-none backdrop-blur-sm"
                   />
                   {focusedField === 'message' && (
                     <motion.div
-                      className="absolute inset-0 border-2 border-purple-500 rounded-xl pointer-events-none"
+                      className="absolute inset-0 border-2 border-slate-600 rounded-xl pointer-events-none"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -375,12 +374,14 @@ export default function ContactSection() {
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
               >
-                <MagneticButton
+                <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group relative w-full px-10 py-5 bg-gradient-to-r from-slate-700 to-cyan-800 text-white font-bold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-slate-600/25 hover:shadow-slate-600/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="relative z-10 flex items-center gap-3">
+                  <span className="relative z-10 flex items-center justify-center gap-3">
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                     {!isSubmitting && (
                       <motion.svg
@@ -388,19 +389,20 @@ export default function ContactSection() {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        whileHover={{ x: 5 }}
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </motion.svg>
                     )}
                   </span>
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600"
+                    className="absolute inset-0 bg-gradient-to-r from-cyan-800 to-slate-700"
                     initial={{ x: '-100%' }}
                     whileHover={{ x: 0 }}
                     transition={{ duration: 0.3 }}
                   />
-                </MagneticButton>
+                </motion.button>
               </motion.div>
 
               {/* Success Message */}
@@ -424,7 +426,7 @@ export default function ContactSection() {
                       <div className="text-gray-300 text-base leading-relaxed mb-3">
                         تم استلام رسالتك بنجاح! سأقوم بالرد عليك في أقرب وقت ممكن على البريد الإلكتروني:
                       </div>
-                      <div className="text-purple-400 font-semibold text-base mb-3 break-all">
+                      <div className="text-cyan-400 font-semibold text-base mb-3 break-all">
                         {submittedData.email}
                       </div>
                       <div className="text-gray-400 text-sm flex items-center gap-2">
@@ -466,3 +468,12 @@ export default function ContactSection() {
     </section>
   );
 }
+
+
+
+
+
+
+
+
+

@@ -115,7 +115,7 @@ export default function CustomVideoPlayer({ src, className = '', poster = null }
       {/* Loading Spinner */}
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
@@ -132,7 +132,7 @@ export default function CustomVideoPlayer({ src, className = '', poster = null }
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl"
+              className="w-12 h-12 bg-gradient-to-br from-slate-600 to-cyan-700 rounded-full flex items-center justify-center shadow-2xl"
             >
               <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
@@ -157,7 +157,7 @@ export default function CustomVideoPlayer({ src, className = '', poster = null }
               onClick={handleSeek}
             >
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full relative"
+                className="h-full bg-gradient-to-r from-slate-600 to-cyan-700 rounded-full relative"
                 style={{ width: `${(currentTime / duration) * 100}%` }}
               >
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity" />
@@ -171,7 +171,7 @@ export default function CustomVideoPlayer({ src, className = '', poster = null }
                 {/* Play/Pause Button */}
                 <button
                   onClick={togglePlay}
-                  className="w-8 h-8 flex items-center justify-center bg-purple-500 hover:bg-purple-600 rounded-full transition-colors"
+                  className="w-8 h-8 flex items-center justify-center bg-slate-600 hover:bg-slate-700 rounded-full transition-colors"
                 >
                   {isPlaying ? (
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -242,3 +242,11 @@ export default function CustomVideoPlayer({ src, className = '', poster = null }
     </div>
   );
 }
+
+
+
+
+
+
+
+
