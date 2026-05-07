@@ -6,6 +6,7 @@ import PageLoader from './components/PageLoader';
 import SEO from './components/SEO';
 import Navigation from './components/Navigation';
 import HeroSection from './components/Hero3D';
+import MobileWarning from './components/MobileWarning';
 import { getCSSGradient, getGradient } from './config/colorsConfig';
 import usePerformance from './hooks/usePerformance';
 import './index.css';
@@ -83,6 +84,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SEO />
+      <MobileWarning />
       
       <AnimatePresence>
         {isLoading && (
