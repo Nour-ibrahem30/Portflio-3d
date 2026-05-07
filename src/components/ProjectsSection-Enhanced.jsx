@@ -360,7 +360,121 @@ export default function ProjectsSectionEnhanced() {
           },
         ];
         
-        const fallbackProjects = [...localProjects, ...staticFallbackProjects];
+        // Add other projects to fallback
+        const otherFallbackProjects = [
+          {
+            id: 'jadoo-fallback',
+            name: 'jadoo',
+            full_name: 'Nour-ibrahem30/jadoo',
+            description: 'Travel booking website built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/jadoo',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Travel booking website built during Web Master internship. Features responsive design and interactive UI.'
+          },
+          {
+            id: 'kalaly-fallback',
+            name: 'Kalaly-Project',
+            full_name: 'Nour-ibrahem30/Kalaly-Project',
+            description: 'E-commerce project built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/Kalaly-Project',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'E-commerce project built during Web Master internship. Includes product listings and shopping cart functionality.'
+          },
+          {
+            id: 'travel-fallback',
+            name: 'Travel',
+            full_name: 'Nour-ibrahem30/Travel',
+            description: 'Tourism website built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/Travel',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Tourism website built during Web Master internship. Includes destination listings and booking features.'
+          },
+          {
+            id: 'quiz-fallback',
+            name: 'Quiz-App',
+            full_name: 'Nour-ibrahem30/Quiz-App',
+            description: 'Interactive quiz application',
+            html_url: 'https://github.com/Nour-ibrahem30/Quiz-App',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Interactive quiz application with multiple choice questions and score tracking.'
+          },
+          {
+            id: 'memory-fallback',
+            name: 'Memory-Game',
+            full_name: 'Nour-ibrahem30/Memory-Game',
+            description: 'Memory card matching game',
+            html_url: 'https://github.com/Nour-ibrahem30/Memory-Game',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Memory card matching game with different difficulty levels.'
+          },
+          {
+            id: 'hangman-fallback',
+            name: 'Hangman',
+            full_name: 'Nour-ibrahem30/Hangman',
+            description: 'Classic Hangman word guessing game',
+            html_url: 'https://github.com/Nour-ibrahem30/Hangman',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Classic Hangman word guessing game with multiple categories.'
+          },
+          {
+            id: 'ecommerce-fallback',
+            name: 'E-Commerce',
+            full_name: 'Nour-ibrahem30/E-Commerce',
+            description: 'E-commerce website with shopping cart',
+            html_url: 'https://github.com/Nour-ibrahem30/E-Commerce',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-04-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'E-commerce website with product catalog and shopping cart functionality.'
+          },
+          {
+            id: 'kasper-fallback',
+            name: 'Kasper',
+            full_name: 'Nour-ibrahem30/Kasper',
+            description: 'Modern landing page template',
+            html_url: 'https://github.com/Nour-ibrahem30/Kasper',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Modern landing page template with clean design.'
+          },
+          {
+            id: 'leon-fallback',
+            name: 'Leon',
+            full_name: 'Nour-ibrahem30/Leon',
+            description: 'Minimal agency template',
+            html_url: 'https://github.com/Nour-ibrahem30/Leon',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Minimal agency template with responsive design.'
+          },
+          {
+            id: 'cyborg-fallback',
+            name: 'Cyborg-Gaming',
+            full_name: 'Nour-ibrahem30/Cyborg-Gaming',
+            description: 'Gaming website template',
+            html_url: 'https://github.com/Nour-ibrahem30/Cyborg-Gaming',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-02-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Gaming website template with modern design.'
+          },
+        ];
+        
+        const fallbackProjects = [...localProjects, ...staticFallbackProjects, ...otherFallbackProjects];
         const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
         
