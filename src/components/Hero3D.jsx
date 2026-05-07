@@ -211,39 +211,39 @@ export default function Hero3D() {
     // Defer animation until after initial render
     const timeoutId = setTimeout(() => {
       const tl = gsap.timeline({ 
-        delay: 0.3, // Reduced from 0.5
-        defaults: { force3D: true, will-change: 'transform' } // Enable GPU acceleration
+        delay: 0.3,
+        defaults: { force3D: true }
       });
       
       tl.from('.hero-badge', {
         scale: 0,
         opacity: 0,
-        duration: 0.4, // Reduced from 0.6
-        ease: 'back.out(1.7)', // Reduced from 2
-        clearProps: 'all' // Clean up after animation
+        duration: 0.4,
+        ease: 'back.out(1.7)',
+        clearProps: 'all'
       })
       .from('.hero-title', {
-        y: 80, // Reduced from 100
+        y: 80,
         opacity: 0,
-        duration: 0.8, // Reduced from 1
-        ease: 'power3.out', // Changed from power4
+        duration: 0.8,
+        ease: 'power3.out',
         clearProps: 'all'
-      }, '-=0.2') // Reduced overlap
+      }, '-=0.2')
       .from('.hero-subtitle', {
-        y: 40, // Reduced from 50
+        y: 40,
         opacity: 0,
-        duration: 0.6, // Reduced from 0.8
-        ease: 'power2.out', // Changed from power3
+        duration: 0.6,
+        ease: 'power2.out',
         clearProps: 'all'
       }, '-=0.3')
       .from('.hero-cta', {
         scale: 0,
         opacity: 0,
-        duration: 0.4, // Reduced from 0.5
-      stagger: 0.08, // Reduced from 0.1
-      ease: 'back.out(1.5)' // Reduced from 1.7
-    }, '-=0.3');
-    }, 100); // Defer by 100ms
+        duration: 0.4,
+        stagger: 0.08,
+        ease: 'back.out(1.5)'
+      }, '-=0.3');
+    }, 100);
 
     return () => clearTimeout(timeoutId);
   }, []);

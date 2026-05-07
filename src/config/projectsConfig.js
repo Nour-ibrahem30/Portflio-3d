@@ -14,13 +14,14 @@ export const projectsConfig = {
    */
   featured: [
     'Portflio-3d',
+    'YLY_Reg',
     'Elgokh',
     'Creative-child',
     'intiative_Website_Value',
     'SBS-Website-Clone',
     'Green-studio',
-    'Family',
     'VivaDecor',
+    'Family',
   ],
 
   /**
@@ -67,6 +68,14 @@ export const projectsConfig = {
       tags: ['React', 'Vite', 'Tailwind CSS', 'GSAP', 'Framer Motion'],
       highlight: true,
       projectImage: '/Featured_Projects/portfolio-3d.jpg'
+    },
+    'YLY_Reg': {
+      displayName: 'YLY Registration System',
+      customDescription: 'QR Code نظام متكامل لإدارة المتطوعين والفعاليات باستخدام للحضور ورفع المهام. - ✅ تسجيل حساب جديد مع معلومات فريد لكل مستخدم - ✅ عرض QR Code - ✅ كاملة',
+      featured: true,
+      tags: ['JavaScript', 'QR Code', 'Registration', 'Events'],
+      highlight: true,
+      projectImage: '/Featured_Projects/yly.jpg'
     },
     'Elgokh': {
       displayName: 'Elgokh',

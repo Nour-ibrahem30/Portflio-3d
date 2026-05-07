@@ -1,4 +1,5 @@
-import { useEffect, useState, lazy, Suspense, React } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageLoader from './components/PageLoader';

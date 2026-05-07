@@ -178,14 +178,16 @@ export const timelineConfig = [
   {
     id: 'yly-2025',
     year: '2025',
-    title: 'Core Team Member',
+    title: 'Core Team Member & Developer',
     company: 'Ministry of Youth and Sports (YLY Initiative)',
     location: 'Cairo, Egypt',
     period: '2025 – Present',
-    description: 'Contribute to planning and executing youth-focused initiatives and events. Coordinate with team members to ensure smooth implementation and successful outcomes.',
-    skills: ['Team Coordination', 'Event Planning', 'Communication'],
+    description: 'Contribute to planning and executing youth-focused initiatives and events. Developed YLY Registration System - a comprehensive QR Code-based platform for managing volunteers and events with attendance tracking and task management features.',
+    skills: ['Team Coordination', 'Event Planning', 'JavaScript', 'QR Code', 'Web Development'],
     type: 'volunteer',
-    projects: [],
+    projects: [
+      'YLY_Reg',
+    ],
     liveUrls: [],
     // Event photos
     eventPhotos: [
@@ -215,6 +217,7 @@ export const timelineConfig = [
     stats: {
       eventsOrganized: 5,
       duration: '6+ months',
+      projectsCompleted: 1,
     },
   },
   {

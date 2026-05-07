@@ -176,15 +176,28 @@ export default function ProjectsSectionEnhanced() {
                 }
               }
               
-              // Fallback to GitHub OpenGraph only if no image found
+              // Fallback to default project image for "other" projects
               if (!projectImage) {
-                projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+                // Check if this is a featured project
+                const isFeatured = projectsConfig.featured.includes(repo.name);
+                if (isFeatured) {
+                  // Use GitHub OpenGraph for featured projects without custom image
+                  projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+                } else {
+                  // Use default image for other projects
+                  projectImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3Cg transform=%27translate(400,300)%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%27120%27 fill=%27%23cbd5e1%27 opacity=%270.1%27/%3E%3Cpath d=%27M-40,-20 L-40,20 L0,40 L40,20 L40,-20 L0,-40 Z%27 fill=%27%23cbd5e1%27 opacity=%270.8%27/%3E%3Ccircle cx=%270%27 cy=%27-10%27 r=%2715%27 fill=%27%23475569%27/%3E%3Cpath d=%27M-25,10 Q0,30 25,10%27 stroke=%27%23475569%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/g%3E%3Ctext x=%27400%27 y=%27480%27 font-family=%27Arial,sans-serif%27 font-size=%2724%27 fill=%27%2364748b%27 text-anchor=%27middle%27%3EJAVASCRIPT%3C/text%3E%3C/svg%3E';
+                }
               }
               
             } catch (error) {
               console.log(`Could not fetch data for ${repo.name}`);
-              // Use GitHub OpenGraph as fallback
-              projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+              // Use default image for other projects, GitHub OpenGraph for featured
+              const isFeatured = projectsConfig.featured.includes(repo.name);
+              if (isFeatured) {
+                projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+              } else {
+                projectImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3Cg transform=%27translate(400,300)%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%27120%27 fill=%27%23cbd5e1%27 opacity=%270.1%27/%3E%3Cpath d=%27M-40,-20 L-40,20 L0,40 L40,20 L40,-20 L0,-40 Z%27 fill=%27%23cbd5e1%27 opacity=%270.8%27/%3E%3Ccircle cx=%270%27 cy=%27-10%27 r=%2715%27 fill=%27%23475569%27/%3E%3Cpath d=%27M-25,10 Q0,30 25,10%27 stroke=%27%23475569%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/g%3E%3Ctext x=%27400%27 y=%27480%27 font-family=%27Arial,sans-serif%27 font-size=%2724%27 fill=%27%2364748b%27 text-anchor=%27middle%27%3EJAVASCRIPT%3C/text%3E%3C/svg%3E';
+              }
             }
             
             return {
@@ -486,7 +499,7 @@ export default function ProjectsSectionEnhanced() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr"
               >
                 {visibleProjects.map((project, index) => (
                   <ProjectCard
@@ -553,7 +566,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       onMouseEnter={() => setHoveredIndex(index)}
       onMouseLeave={() => setHoveredIndex(null)}
       whileHover={{ y: -10 }}
-      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl"
+      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl h-[500px] flex flex-col"
     >
       {/* NEW or FEATURED Badge */}
       {(isNew || isHighlighted) && (
@@ -573,7 +586,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       )}
 
       {/* Project Image */}
-      <div className="relative h-64 overflow-hidden bg-zinc-800">
+      <div className="relative h-64 overflow-hidden bg-zinc-800 flex-shrink-0">
         <div className="absolute inset-0">
           <img 
             src={project.projectImage}
@@ -615,8 +628,8 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
         </motion.div>
       </div>
 
-      {/* Content */}
-      <div className="p-6">
+      {/* Content - Flex column with proper spacing */}
+      <div className="p-6 flex flex-col flex-1 overflow-hidden">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <motion.h3 
@@ -650,45 +663,55 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
           </motion.div>
         </div>
 
-        <p className="text-gray-400 mb-4 line-clamp-3 text-sm leading-relaxed">
+        <p className="text-gray-400 mb-4 line-clamp-2 text-sm leading-relaxed flex-grow overflow-hidden">
           {project.readme}
         </p>
 
-        <div className="flex items-center gap-6 text-sm text-gray-500 mb-4">
-          <motion.span 
-            className="flex items-center gap-2"
-            whileHover={{ scale: 1.15, color: '#475569' }}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-            </svg>
-            {project.stargazers_count}
-          </motion.span>
-          <motion.span 
-            className="flex items-center gap-2"
-            whileHover={{ scale: 1.15 }}
-            style={{ color: hoveredIndex === index ? '#3b82f6' : undefined }}
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
-            </svg>
-            {project.forks_count}
-          </motion.span>
-        </div>
+        {/* Stats and Button Container - Fixed at bottom */}
+        <div className="mt-auto space-y-4">
+          <div className="flex items-center gap-6 text-sm text-gray-500">
+            <motion.span 
+              className="flex items-center gap-2"
+              whileHover={{ scale: 1.15, color: '#475569' }}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              {project.stargazers_count}
+            </motion.span>
+            <motion.span 
+              className="flex items-center gap-2"
+              whileHover={{ scale: 1.15 }}
+              style={{ color: hoveredIndex === index ? '#3b82f6' : undefined }}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
+              {project.forks_count}
+            </motion.span>
+          </div>
 
+          {/* View Project Button - Consistent styling */}
           <motion.div
-            className="relative overflow-hidden rounded-lg"
-            whileHover={{ scale: 1.03 }}
+            className="relative overflow-hidden rounded-xl"
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="px-4 py-2 border text-center font-medium text-sm transition-colors" style={{
-              background: hoveredIndex === index ? 'rgba(38, 208, 206, 0.2)' : 'rgba(38, 208, 206, 0.1)',
-              borderColor: 'rgba(38, 208, 206, 0.3)',
-              color: '#3b82f6'
+            <div className="relative px-6 py-3 border-2 text-center font-semibold text-sm transition-all duration-300 rounded-xl" style={{
+              background: hoveredIndex === index ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%)' : 'rgba(24, 24, 27, 0.5)',
+              borderColor: hoveredIndex === index ? 'rgba(59, 130, 246, 0.5)' : 'rgba(63, 63, 70, 0.3)',
+              color: hoveredIndex === index ? '#60a5fa' : '#9ca3af',
+              backdropFilter: 'blur(8px)'
             }}>
-              View Project
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                View Project
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
             </div>
           </motion.div>
+        </div>
       </div>
 
       <motion.div 

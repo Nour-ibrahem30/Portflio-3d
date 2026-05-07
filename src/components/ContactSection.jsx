@@ -373,19 +373,20 @@ export default function ContactSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 transition={{ duration: 0.5, delay: 0.8 }}
+                className="flex justify-start"
               >
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.05, x: 5, y: -5 }}
                   whileTap={{ scale: 0.98 }}
-                  className="group relative w-full px-10 py-5 bg-gradient-to-r from-slate-700 to-cyan-800 text-white font-bold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-slate-600/25 hover:shadow-slate-600/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative px-8 py-3.5 bg-gradient-to-r from-slate-700 to-cyan-800 text-white font-semibold uppercase tracking-wider overflow-hidden rounded-xl shadow-lg shadow-slate-600/25 hover:shadow-slate-600/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm min-w-[200px]"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
+                  <span className="relative z-10 flex items-center justify-center gap-2.5">
                     {isSubmitting ? 'Sending...' : 'Send Message'}
                     {!isSubmitting && (
                       <motion.svg
-                        className="w-5 h-5"
+                        className="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
