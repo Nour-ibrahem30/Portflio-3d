@@ -54,6 +54,25 @@ section {
   contain: layout style paint;
 }
 
+/* Optimize Framer Motion animations */
+[data-framer-component-type] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduce reflows for motion elements */
+.motion-reduce-reflow {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Optimize images and videos */
+img[loading="lazy"],
+video[preload="none"] {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -32,7 +32,9 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         passes: 3,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        dead_code: true,
+        unused: true
       },
       format: {
         comments: false
@@ -44,9 +46,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks
+          // Vendor chunks - more granular splitting
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
               return 'react-vendor';
             }
             if (id.includes('framer-motion')) {
@@ -55,23 +57,11 @@ export default defineConfig({
             if (id.includes('gsap')) {
               return 'gsap-vendor';
             }
-            if (id.includes('three')) {
-              return 'three-vendor';
+            if (id.includes('firebase')) {
+              return 'firebase-vendor';
             }
+            // Group all other vendors together
             return 'vendor';
-          }
-          // Component chunks
-          if (id.includes('components/ContactSection')) {
-            return 'contact';
-          }
-          if (id.includes('components/ProjectsSection')) {
-            return 'projects';
-          }
-          if (id.includes('components/TimelineSection')) {
-            return 'timeline';
-          }
-          if (id.includes('components/FavouriteVideosGallery')) {
-            return 'videos';
           }
         },
         chunkFileNames: 'js/[name]-[hash].js',
@@ -88,6 +78,11 @@ export default defineConfig({
           return `[ext]/[name]-[hash].[ext]`;
         }
       },
+      treeshake: {
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false
+      }
     },
     chunkSizeWarningLimit: 800,
     cssCodeSplit: true,
@@ -96,7 +91,8 @@ export default defineConfig({
     assetsInlineLimit: 4096 // Inline small assets
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion', 'gsap', 'three'],
+    include: ['react', 'react-dom', 'framer-motion', 'gsap'],
+    exclude: ['three']
   },
   server: {
     hmr: {

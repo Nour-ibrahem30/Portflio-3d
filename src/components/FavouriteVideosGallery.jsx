@@ -15,7 +15,30 @@ export default function FavouriteVideosGallery() {
   const [loadingVideo, setLoadingVideo] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [buffering, setBuffering] = useState({});
+  const [isInView, setIsInView] = useState(false);
   const videoRefs = useRef({});
+  const sectionRef = useRef(null);
+
+  // Lazy load videos when section is in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect(); // Stop observing after first view
+          }
+        });
+      },
+      { rootMargin: '200px' } // Start loading 200px before section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handlePlayVideo = (videoId) => {
     // Stop other videos
@@ -55,7 +78,7 @@ export default function FavouriteVideosGallery() {
   };
 
   return (
-    <section className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black">
+    <section ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black">
       {/* Background Effects */}
       <div className="absolute inset-0 opacity-20 -z-10">
         <motion.div
@@ -132,7 +155,7 @@ export default function FavouriteVideosGallery() {
                       className="w-full h-full object-cover bg-black"
                       controls
                       playsInline
-                      preload="none"
+                      preload={isInView ? "auto" : "none"}
                       muted={false}
                       onLoadStart={() => setLoadingVideo(video.id)}
                       onLoadedData={(e) => handleVideoLoaded(e, video.id)}
@@ -161,8 +184,9 @@ export default function FavouriteVideosGallery() {
                     <video
                       src={video.src}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      preload="none"
-                      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3C/svg%3E"
+                      preload={isInView ? "metadata" : "none"}
+                      muted
+                      playsInline
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                     

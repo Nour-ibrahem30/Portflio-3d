@@ -189,21 +189,29 @@ export default function Hero3D() {
   const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
-  // Smooth mouse tracking
-  const springConfig = { stiffness: 150, damping: 15 };
+  // Smooth mouse tracking - optimized
+  const springConfig = { stiffness: 100, damping: 20, mass: 0.5 };
   const mouseX = useSpring(0, springConfig);
   const mouseY = useSpring(0, springConfig);
 
   useEffect(() => {
+    let rafId;
     const handleMouseMove = (e) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2;
-      const y = (e.clientY / window.innerHeight - 0.5) * 2;
-      mouseX.set(x * 50);
-      mouseY.set(y * 50);
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 2;
+        const y = (e.clientY / window.innerHeight - 0.5) * 2;
+        mouseX.set(x * 50);
+        mouseY.set(y * 50);
+        rafId = null;
+      });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [mouseX, mouseY]);
 
   // GSAP Animations for content - Optimized with defer
@@ -255,7 +263,7 @@ export default function Hero3D() {
   return (
     <motion.section
       ref={heroRef}
-      style={{ y, scale }}
+      style={{ y, scale, willChange: 'transform' }}
       className="relative min-h-screen flex items-center justify-center w-full bg-black"
     >
       {/* Constellation Background Animation */}
@@ -317,6 +325,7 @@ export default function Hero3D() {
           style={{
             rotateX: useTransform(mouseY, [-50, 50], [2, -2]),
             rotateY: useTransform(mouseX, [-50, 50], [-2, 2]),
+            willChange: 'transform'
           }}
         >
           <h1 className="text-7xl md:text-8xl lg:text-[9rem] font-bold leading-none">

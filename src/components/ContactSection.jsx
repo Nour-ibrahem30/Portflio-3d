@@ -17,17 +17,24 @@ export default function ContactSection() {
 
   useEffect(() => {
     if (isInView && titleRef.current) {
-      gsap.from(titleRef.current.children, {
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 80%',
-        },
-        y: 100,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 1,
-        ease: 'power4.out'
-      });
+      const timeoutId = setTimeout(() => {
+        gsap.from(titleRef.current.children, {
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: 'top 80%',
+            once: true
+          },
+          y: 80,
+          opacity: 0,
+          stagger: 0.08,
+          duration: 0.8,
+          ease: 'power3.out',
+          force3D: true,
+          clearProps: 'all'
+        });
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isInView]);
 

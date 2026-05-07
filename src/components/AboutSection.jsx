@@ -27,11 +27,11 @@ export default function AboutSection() {
             start: 'top 80%',
             once: true // Only animate once
           },
-          x: -80, // Reduced from -100
+          x: -60, // Reduced from -80
           opacity: 0,
-          stagger: 0.08, // Reduced from 0.1
-          duration: 0.8, // Reduced from 1
-          ease: 'power3.out', // Changed from power4
+          stagger: 0.06, // Reduced from 0.08
+          duration: 0.6, // Reduced from 0.8
+          ease: 'power2.out', // Changed from power3
           force3D: true, // GPU acceleration
           clearProps: 'all' // Clean up after animation
         });

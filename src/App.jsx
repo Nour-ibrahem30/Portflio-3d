@@ -95,6 +95,7 @@ function App() {
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 0.5 }}
         className="relative min-h-screen bg-black text-white w-full"
+        style={{ willChange: 'opacity' }}
       >
         {/* Version Badge */}
         <motion.div
@@ -102,6 +103,7 @@ function App() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 1.5 }}
           className="fixed top-20 left-6 z-50"
+          style={{ willChange: 'transform, opacity' }}
         >
           <div className="relative group">
             <div className="absolute inset-0 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" style={{ background: getCSSGradient(1) }} />
