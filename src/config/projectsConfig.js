@@ -157,7 +157,7 @@ export const projectsConfig = {
   display: {
     showArchived: false, // Show archived tab - DISABLED
     defaultTab: 'featured', // 'featured', 'other', or 'archived'
-    projectsPerPage: 50, // Increased from 6 to show more projects
+    projectsPerPage: 6, // Show 6 initially, load more on button click
     sortOtherBy: 'created', // 'created', 'updated', 'stars', 'name'
     sortOrder: 'desc', // 'asc' or 'desc'
   },

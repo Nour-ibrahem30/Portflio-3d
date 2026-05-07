@@ -527,24 +527,29 @@ export default function ProjectsSectionEnhanced() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex justify-center mt-16"
+                className="flex flex-col items-center gap-4 mt-16"
               >
+                {/* Remaining count */}
+                <p className="text-gray-500 text-sm">
+                  <span className="text-cyan-400 font-bold">{currentProjects.length - displayCount}</span> more projects remaining
+                </p>
+
                 <motion.button
                   onClick={() => setDisplayCount(prev => Math.min(prev + 6, currentProjects.length))}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="group relative px-10 py-5 overflow-hidden rounded-full"
+                  className="group relative px-10 py-4 overflow-hidden rounded-full"
                   style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
                 >
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)' }} />
-                  <div className="relative z-10 flex items-center gap-3 text-white font-semibold uppercase tracking-wider">
-                    <span>Load More Projects</span>
+                  <div className="relative z-10 flex items-center gap-3 text-white font-semibold uppercase tracking-wider text-sm">
+                    <span>Show More</span>
                     <motion.svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
-                      animate={{ y: [0, 5, 0] }}
+                      animate={{ y: [0, 4, 0] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
