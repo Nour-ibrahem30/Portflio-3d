@@ -88,11 +88,11 @@ function HeroConstellation({ children }) {
       }
     }
 
-    const stars = Array.from({ length: 60 }, () => new Star()); // Reduced from 80
+    const stars = Array.from({ length: 40 }, () => new Star()); // Reduced from 60
 
     let animationId;
     let lastTime = 0;
-    const fps = 30; // Reduced from 60
+    const fps = 24; // Reduced from 30
     const frameDelay = 1000 / fps;
     
     function animate(currentTime) {
@@ -116,12 +116,12 @@ function HeroConstellation({ children }) {
       });
 
       // Draw connections (optimized - only check nearby stars)
-      const connectionDistance = 120; // Reduced from 150
-      const maxConnections = 3; // Limit connections per star
+      const connectionDistance = 100; // Reduced from 120
+      const maxConnections = 2; // Limit connections per star - Reduced from 3
       stars.forEach((star1, i) => {
         let connections = 0;
         // Only check next few stars to reduce calculations
-        const checkLimit = Math.min(i + 8, stars.length); // Reduced from 10
+        const checkLimit = Math.min(i + 6, stars.length); // Reduced from 8
         for (let j = i + 1; j < checkLimit && connections < maxConnections; j++) {
           const star2 = stars[j];
           const dx = star1.x - star2.x;
@@ -219,39 +219,39 @@ export default function Hero3D() {
     // Defer animation until after initial render
     const timeoutId = setTimeout(() => {
       const tl = gsap.timeline({ 
-        delay: 0.3,
+        delay: 0.2,
         defaults: { force3D: true }
       });
       
       tl.from('.hero-badge', {
         scale: 0,
         opacity: 0,
-        duration: 0.4,
-        ease: 'back.out(1.7)',
+        duration: 0.3,
+        ease: 'back.out(1.5)',
         clearProps: 'all'
       })
       .from('.hero-title', {
-        y: 80,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        clearProps: 'all'
-      }, '-=0.2')
-      .from('.hero-subtitle', {
-        y: 40,
+        y: 60,
         opacity: 0,
         duration: 0.6,
         ease: 'power2.out',
         clearProps: 'all'
-      }, '-=0.3')
+      }, '-=0.1')
+      .from('.hero-subtitle', {
+        y: 30,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        clearProps: 'all'
+      }, '-=0.2')
       .from('.hero-cta', {
         scale: 0,
         opacity: 0,
-        duration: 0.4,
-        stagger: 0.08,
-        ease: 'back.out(1.5)'
-      }, '-=0.3');
-    }, 100);
+        duration: 0.3,
+        stagger: 0.06,
+        ease: 'back.out(1.3)'
+      }, '-=0.2');
+    }, 150);
 
     return () => clearTimeout(timeoutId);
   }, []);

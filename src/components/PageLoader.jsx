@@ -16,11 +16,11 @@ export default function PageLoader({ onLoadComplete }) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const minLoadingTime = 1500; // Reduced from 2500ms
+    const minLoadingTime = 1000; // Reduced from 1500ms
 
     const interval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = Math.min(prev + Math.random() * 15, 100); // Faster progress
+        const newProgress = Math.min(prev + Math.random() * 20, 100); // Even faster progress
         
         // Update loading text based on progress
         const currentStage = loadingStages.find(stage => 
@@ -40,14 +40,14 @@ export default function PageLoader({ onLoadComplete }) {
           
           setTimeout(() => {
             setIsComplete(true);
-            setTimeout(() => onLoadComplete?.(), 800);
+            setTimeout(() => onLoadComplete?.(), 600);
           }, remainingTime);
           
           return 100;
         }
         return newProgress;
       });
-    }, 100);
+    }, 80); // Faster interval
 
     return () => clearInterval(interval);
   }, [onLoadComplete]);

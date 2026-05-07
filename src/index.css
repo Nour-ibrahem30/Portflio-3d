@@ -52,6 +52,8 @@ canvas {
 /* Optimize scroll performance */
 section {
   contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
 }
 
 /* Optimize Framer Motion animations */
