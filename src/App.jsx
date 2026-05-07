@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense, React } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageLoader from './components/PageLoader';
@@ -9,20 +9,21 @@ import { getCSSGradient, getGradient } from './config/colorsConfig';
 import usePerformance from './hooks/usePerformance';
 import './index.css';
 
-// Lazy load heavy components
-const AboutSection = lazy(() => import('./components/AboutSection'));
-const SkillsSection = lazy(() => import('./components/SkillsSection-Simple'));
-const TimelineSection = lazy(() => import('./components/TimelineSection-Enhanced'));
-const ProjectsSection = lazy(() => import('./components/ProjectsSection-Enhanced'));
-const FavouriteVideosGallery = lazy(() => import('./components/FavouriteVideosGallery'));
-const ContactSection = lazy(() => import('./components/ContactSection'));
+// Lazy load heavy components with prefetch hints
+const AboutSection = lazy(() => import(/* webpackPrefetch: true */ './components/AboutSection'));
+const SkillsSection = lazy(() => import(/* webpackPrefetch: true */ './components/SkillsSection-Simple'));
+const TimelineSection = lazy(() => import(/* webpackChunkName: "timeline" */ './components/TimelineSection-Enhanced'));
+const ProjectsSection = lazy(() => import(/* webpackChunkName: "projects" */ './components/ProjectsSection-Enhanced'));
+const FavouriteVideosGallery = lazy(() => import(/* webpackChunkName: "videos" */ './components/FavouriteVideosGallery'));
+const ContactSection = lazy(() => import(/* webpackChunkName: "contact" */ './components/ContactSection'));
 
-// Loading fallback component
-const SectionLoader = () => (
+// Loading fallback component - Memoized
+const SectionLoader = React.memo(() => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#3b82f6', borderTopColor: 'transparent' }} />
   </div>
-);
+));
+SectionLoader.displayName = 'SectionLoader';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);

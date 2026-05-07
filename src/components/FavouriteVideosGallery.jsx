@@ -132,7 +132,7 @@ export default function FavouriteVideosGallery() {
                       className="w-full h-full object-cover bg-black"
                       controls
                       playsInline
-                      preload="auto"
+                      preload="none"
                       muted={false}
                       onLoadStart={() => setLoadingVideo(video.id)}
                       onLoadedData={(e) => handleVideoLoaded(e, video.id)}
@@ -161,7 +161,8 @@ export default function FavouriteVideosGallery() {
                     <video
                       src={video.src}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      preload="metadata"
+                      preload="none"
+                      poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23000' width='400' height='300'/%3E%3C/svg%3E"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                     
@@ -173,6 +174,7 @@ export default function FavouriteVideosGallery() {
                         scale: hoveredIndex === index ? 1.2 : 1,
                       }}
                       transition={{ duration: 0.3 }}
+                      aria-label={`Play video ${video.id}`}
                     >
                       <div className="w-20 h-20 rounded-full bg-slate-600/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-slate-600 transition-colors">
                         <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">

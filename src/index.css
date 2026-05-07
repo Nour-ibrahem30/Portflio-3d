@@ -26,7 +26,32 @@ body {
 /* Performance optimizations */
 img, video {
   content-visibility: auto;
-  will-change: transform;
+}
+
+/* GPU acceleration for animated elements */
+.hero-badge,
+.hero-title,
+.hero-subtitle,
+.hero-cta {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Remove will-change after animation */
+.animation-complete {
+  will-change: auto;
+}
+
+/* Optimize canvas rendering */
+canvas {
+  will-change: contents;
+  transform: translateZ(0);
+}
+
+/* Optimize scroll performance */
+section {
+  contain: layout style paint;
 }
 
 /* Reduce motion for users who prefer it */

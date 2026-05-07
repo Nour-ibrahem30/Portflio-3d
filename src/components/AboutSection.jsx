@@ -19,17 +19,25 @@ export default function AboutSection() {
 
   useEffect(() => {
     if (isInView && titleRef.current) {
-      gsap.from(titleRef.current.children, {
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: 'top 80%',
-        },
-        x: -100,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 1,
-        ease: 'power4.out'
-      });
+      // Defer animation
+      const timeoutId = setTimeout(() => {
+        gsap.from(titleRef.current.children, {
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: 'top 80%',
+            once: true // Only animate once
+          },
+          x: -80, // Reduced from -100
+          opacity: 0,
+          stagger: 0.08, // Reduced from 0.1
+          duration: 0.8, // Reduced from 1
+          ease: 'power3.out', // Changed from power4
+          force3D: true, // GPU acceleration
+          clearProps: 'all' // Clean up after animation
+        });
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [isInView]);
 

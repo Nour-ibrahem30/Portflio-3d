@@ -16,11 +16,11 @@ export default function PageLoader({ onLoadComplete }) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const minLoadingTime = 2500; // Minimum 2.5 seconds
+    const minLoadingTime = 1500; // Reduced from 2500ms
 
     const interval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = Math.min(prev + Math.random() * 10, 100);
+        const newProgress = Math.min(prev + Math.random() * 15, 100); // Faster progress
         
         // Update loading text based on progress
         const currentStage = loadingStages.find(stage => 

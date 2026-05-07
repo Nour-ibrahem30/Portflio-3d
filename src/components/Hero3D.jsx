@@ -2,28 +2,34 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import gsap from 'gsap';
 
-// Constellation Animation Component
+// Constellation Animation Component - Optimized
 function HeroConstellation({ children }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
+  const animationRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Track mouse position
+    // Track mouse position with throttle
+    let mouseTimeout;
     const handleMouseMove = (e) => {
-      mouseRef.current = {
-        x: e.clientX,
-        y: e.clientY
-      };
+      if (mouseTimeout) return;
+      mouseTimeout = setTimeout(() => {
+        mouseRef.current = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        mouseTimeout = null;
+      }, 16); // ~60fps
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     class Star {
       constructor() {
@@ -82,11 +88,11 @@ function HeroConstellation({ children }) {
       }
     }
 
-    const stars = Array.from({ length: 80 }, () => new Star());
+    const stars = Array.from({ length: 60 }, () => new Star()); // Reduced from 80
 
     let animationId;
     let lastTime = 0;
-    const fps = 60;
+    const fps = 30; // Reduced from 60
     const frameDelay = 1000 / fps;
     
     function animate(currentTime) {
@@ -110,24 +116,27 @@ function HeroConstellation({ children }) {
       });
 
       // Draw connections (optimized - only check nearby stars)
-      const connectionDistance = 150;
+      const connectionDistance = 120; // Reduced from 150
+      const maxConnections = 3; // Limit connections per star
       stars.forEach((star1, i) => {
+        let connections = 0;
         // Only check next few stars to reduce calculations
-        const checkLimit = Math.min(i + 10, stars.length);
-        for (let j = i + 1; j < checkLimit; j++) {
+        const checkLimit = Math.min(i + 8, stars.length); // Reduced from 10
+        for (let j = i + 1; j < checkLimit && connections < maxConnections; j++) {
           const star2 = stars[j];
           const dx = star1.x - star2.x;
           const dy = star1.y - star2.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
           if (distance < connectionDistance) {
-            const opacity = (1 - distance / connectionDistance) * 0.35;
+            const opacity = (1 - distance / connectionDistance) * 0.3; // Reduced from 0.35
             ctx.strokeStyle = `rgba(71, 85, 105, ${opacity})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(star1.x, star1.y);
             ctx.lineTo(star2.x, star2.y);
             ctx.stroke();
+            connections++;
           }
         }
       });
@@ -135,18 +144,33 @@ function HeroConstellation({ children }) {
       animationId = requestAnimationFrame(animate);
     }
 
-    animate();
+    animate(0);
 
     const handleResize = () => {
+      // Debounce resize
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      animationId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', handleResize);
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 250);
+    };
+
+    window.addEventListener('resize', debouncedResize, { passive: true });
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', debouncedResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationId);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      clearTimeout(resizeTimeout);
+      clearTimeout(mouseTimeout);
     };
   }, []);
 
@@ -182,35 +206,46 @@ export default function Hero3D() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY]);
 
-  // GSAP Animations for content
+  // GSAP Animations for content - Optimized with defer
   useEffect(() => {
-    const tl = gsap.timeline({ delay: 0.5 });
-    
-    tl.from('.hero-badge', {
-      scale: 0,
-      opacity: 0,
-      duration: 0.6,
-      ease: 'back.out(2)'
-    })
-    .from('.hero-title', {
-      y: 100,
-      opacity: 0,
-      duration: 1,
-      ease: 'power4.out'
-    }, '-=0.3')
-    .from('.hero-subtitle', {
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power3.out'
-    }, '-=0.5')
-    .from('.hero-cta', {
-      scale: 0,
-      opacity: 0,
-      duration: 0.5,
-      stagger: 0.1,
-      ease: 'back.out(1.7)'
-    }, '-=0.4');
+    // Defer animation until after initial render
+    const timeoutId = setTimeout(() => {
+      const tl = gsap.timeline({ 
+        delay: 0.3, // Reduced from 0.5
+        defaults: { force3D: true, will-change: 'transform' } // Enable GPU acceleration
+      });
+      
+      tl.from('.hero-badge', {
+        scale: 0,
+        opacity: 0,
+        duration: 0.4, // Reduced from 0.6
+        ease: 'back.out(1.7)', // Reduced from 2
+        clearProps: 'all' // Clean up after animation
+      })
+      .from('.hero-title', {
+        y: 80, // Reduced from 100
+        opacity: 0,
+        duration: 0.8, // Reduced from 1
+        ease: 'power3.out', // Changed from power4
+        clearProps: 'all'
+      }, '-=0.2') // Reduced overlap
+      .from('.hero-subtitle', {
+        y: 40, // Reduced from 50
+        opacity: 0,
+        duration: 0.6, // Reduced from 0.8
+        ease: 'power2.out', // Changed from power3
+        clearProps: 'all'
+      }, '-=0.3')
+      .from('.hero-cta', {
+        scale: 0,
+        opacity: 0,
+        duration: 0.4, // Reduced from 0.5
+      stagger: 0.08, // Reduced from 0.1
+      ease: 'back.out(1.5)' // Reduced from 1.7
+    }, '-=0.3');
+    }, 100); // Defer by 100ms
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const animationNames = [

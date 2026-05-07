@@ -31,28 +31,69 @@ export default defineConfig({
       compress: {
         drop_console: true,
         drop_debugger: true,
-        passes: 3
+        passes: 3,
+        pure_funcs: ['console.log', 'console.info', 'console.debug']
       },
       format: {
         comments: false
+      },
+      mangle: {
+        safari10: true
       }
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'animation-vendor': ['framer-motion', 'gsap', '@gsap/react'],
-          'three-vendor': ['three']
+        manualChunks: (id) => {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-vendor';
+            }
+            if (id.includes('gsap')) {
+              return 'gsap-vendor';
+            }
+            if (id.includes('three')) {
+              return 'three-vendor';
+            }
+            return 'vendor';
+          }
+          // Component chunks
+          if (id.includes('components/ContactSection')) {
+            return 'contact';
+          }
+          if (id.includes('components/ProjectsSection')) {
+            return 'projects';
+          }
+          if (id.includes('components/TimelineSection')) {
+            return 'timeline';
+          }
+          if (id.includes('components/FavouriteVideosGallery')) {
+            return 'videos';
+          }
         },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+        chunkFileNames: 'js/[name]-[hash].js',
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
+            return `images/[name]-[hash].[ext]`;
+          }
+          if (/\.(woff2?|eot|ttf|otf)$/i.test(assetInfo.name)) {
+            return `fonts/[name]-[hash].[ext]`;
+          }
+          return `[ext]/[name]-[hash].[ext]`;
+        }
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 800,
     cssCodeSplit: true,
     sourcemap: false,
-    reportCompressedSize: true
+    reportCompressedSize: false, // Faster builds
+    assetsInlineLimit: 4096 // Inline small assets
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion', 'gsap', 'three'],
