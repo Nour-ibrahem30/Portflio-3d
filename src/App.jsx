@@ -123,7 +123,7 @@ function App() {
                 style={{ backgroundColor: '#4ca1af', boxShadow: '0 0 10px rgba(76, 161, 175, 0.5)' }}
               />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                v 1.0.0
+                v1.0.3
               </span>
             </div>
           </div>
@@ -235,7 +235,7 @@ function App() {
               © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
             </p>
             <p className="text-gray-700 text-xs mt-2">
-              v 1.0.0 — Production Ready
+              v1.0.3 — Production Ready
             </p>
           </div>
         </footer>

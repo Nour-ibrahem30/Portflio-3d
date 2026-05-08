@@ -82,5 +82,20 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Version**: 1.0.0  
+**Version**: 1.0.3  
 **Status**: Production Ready ✅
+
+## Changelog
+
+### v1.0.3 (Latest)
+- ✅ Fixed projects not displaying in production
+- ✅ Added fallback data for GitHub API failures
+- ✅ Optimized API calls to reduce rate limiting
+- ✅ Improved error handling for production environment
+- ✅ All projects now display correctly without GitHub token
+
+### v1.0.2
+- Initial production release
+
+### v1.0.0
+- First stable version

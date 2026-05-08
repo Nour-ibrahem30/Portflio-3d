@@ -4,7 +4,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { organizeProjects, applyProjectOverrides, isNewProject } from '../utils/projectUtils';
 import { projectsConfig, getProjectOverride } from '../config/projectsConfig';
-import { fallbackProjects } from '../data/fallbackProjects';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,32 +23,28 @@ export default function ProjectsSectionEnhanced() {
         console.log('🔄 Starting to fetch projects...');
         
         const headers = { 'Accept': 'application/vnd.github.v3+json' };
-        const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
         
+        const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
         if (githubToken) {
           headers['Authorization'] = `token ${githubToken}`;
           console.log('✅ GitHub token found');
         } else {
-          console.log('⚠️ No GitHub token - using fallback data');
-          const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
-          const organized = organizeProjects(projectsWithOverrides);
-          setAllProjects(organized);
-          setLoading(false);
-          return;
+          console.log('⚠️ No GitHub token - limited to featured projects only');
         }
         
         console.log('📡 Fetching repositories from GitHub...');
         const reposResponse = await fetch(
           'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100&sort=updated',
-          { headers }
+          { headers, timeout: 10000 }
         );
         
         console.log('📊 GitHub API Response Status:', reposResponse.status);
         
         if (!reposResponse.ok) {
           console.error('❌ GitHub API Error:', reposResponse.status);
-          const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
-          const organized = organizeProjects(projectsWithOverrides);
+          // Fallback to featured projects only
+          const featuredOnly = createFallbackProjects();
+          const organized = organizeProjects(featuredOnly);
           setAllProjects(organized);
           setLoading(false);
           return;
@@ -87,34 +82,130 @@ export default function ProjectsSectionEnhanced() {
         
         const allRepos = [...localProjects, ...ownRepos];
         
-        // Process projects - use overrides for images
-        const projectsWithData = allRepos.map((repo) => {
-          let description = repo.description || 'No description available';
-          let projectImage = null;
-          
-          const override = getProjectOverride(repo.name);
-          
-          if (override?.isLocalProject) {
-            const mediaPath = override.localMediaPath || '';
-            projectImage = `${mediaPath}/2.jpg`;
-            description = override.customDescription || description;
-          } else if (override?.projectImage) {
-            projectImage = override.projectImage;
-            description = override.customDescription || description;
-          } else {
+        // Process projects with minimal API calls
+        const projectsWithData = await Promise.allSettled(
+          allRepos.map(async (repo) => {
+            let description = repo.description || 'No description available';
+            let projectImage = null;
+            
+            // Handle local projects
+            const override = getProjectOverride(repo.name);
+            if (override?.isLocalProject) {
+              const mediaPath = override.localMediaPath || '';
+              projectImage = `${mediaPath}/2.jpg`;
+              description = override.customDescription || description;
+              
+              return {
+                ...repo,
+                readme: description,
+                projectImage: projectImage
+              };
+            }
+            
+            // Use local image if available in overrides (PRIORITY)
+            if (override?.projectImage) {
+              projectImage = override.projectImage;
+              description = override.customDescription || description;
+              console.log(`📸 Using local image for ${repo.name}:`, projectImage);
+              
+              return {
+                ...repo,
+                readme: description,
+                projectImage: projectImage
+              };
+            }
+            
+            // Skip README fetch for non-featured projects to save API calls
             const isFeatured = projectsConfig.featured.includes(repo.name);
-            projectImage = isFeatured 
-              ? `https://opengraph.githubassets.com/1/${repo.full_name}`
-              : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3C/svg%3E';
-          }
-          
-          return {
-            ...repo,
-            readme: description,
-            projectImage: projectImage
-          };
-        });
+            
+            // Only fetch README for featured projects without custom description
+            if (isFeatured && !override?.customDescription && githubToken) {
+              try {
+                const readmeResponse = await fetch(
+                  `https://api.github.com/repos/Nour-ibrahem30/${repo.name}/readme`,
+                  { headers, timeout: 5000 }
+                );
+                
+                if (readmeResponse.ok) {
+                  const readmeData = await readmeResponse.json();
+                  const binaryString = atob(readmeData.content);
+                  const bytes = new Uint8Array(binaryString.length);
+                  for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                  }
+                  const readmeContent = new TextDecoder('utf-8').decode(bytes);
+                  
+                  // Extract description
+                  const lines = readmeContent.split('\n');
+                  let meaningfulText = '';
+                  
+                  for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed && 
+                        !trimmed.startsWith('#') && 
+                        !trimmed.startsWith('!') &&
+                        !trimmed.startsWith('[!') &&
+                        !trimmed.startsWith('[![') &&
+                        !trimmed.startsWith('```') &&
+                        !trimmed.startsWith('---') &&
+                        !trimmed.startsWith('|') &&
+                        !trimmed.startsWith('>') &&
+                        trimmed.length > 20) {
+                      meaningfulText += trimmed + ' ';
+                      if (meaningfulText.length > 150) break;
+                    }
+                  }
+                  
+                  if (meaningfulText.length > 20) {
+                    description = meaningfulText.substring(0, 150).trim() + '...';
+                  }
+                  
+                  // Find images
+                  const imageRegex = /!\[.*?\]\((.*?)\)/g;
+                  const images = [...readmeContent.matchAll(imageRegex)];
+                  
+                  if (images.length > 0) {
+                    let imgUrl = images[0][1].trim().replace(/['"]/g, '');
+                    if (!imgUrl.startsWith('http')) {
+                      imgUrl = `https://raw.githubusercontent.com/Nour-ibrahem30/${repo.name}/${repo.default_branch}/${imgUrl}`;
+                    }
+                    projectImage = imgUrl;
+                  }
+                }
+              } catch (err) {
+                console.log(`⚠️ Skipping README for ${repo.name}`);
+              }
+            }
+            
+            // Set default image
+            if (!projectImage) {
+              if (isFeatured) {
+                projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+              } else {
+                projectImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3Cg transform=%27translate(400,300)%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%27120%27 fill=%27%23cbd5e1%27 opacity=%270.1%27/%3E%3Cpath d=%27M-40,-20 L-40,20 L0,40 L40,20 L40,-20 L0,-40 Z%27 fill=%27%23cbd5e1%27 opacity=%270.8%27/%3E%3Ccircle cx=%270%27 cy=%27-10%27 r=%2715%27 fill=%27%23475569%27/%3E%3Cpath d=%27M-25,10 Q0,30 25,10%27 stroke=%27%23475569%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/g%3E%3Ctext x=%27400%27 y=%27480%27 font-family=%27Arial,sans-serif%27 font-size=%2724%27 fill=%27%2364748b%27 text-anchor=%27middle%27%3EJAVASCRIPT%3C/text%3E%3C/svg%3E';
+                }
+              }
+              
+            } catch (error) {
+              console.log(`Could not fetch data for ${repo.name}`);
+              // Use default image for other projects, GitHub OpenGraph for featured
+              const isFeatured = projectsConfig.featured.includes(repo.name);
+              if (isFeatured) {
+                projectImage = `https://opengraph.githubassets.com/1/${repo.full_name}`;
+              } else {
+                projectImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3Cg transform=%27translate(400,300)%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%27120%27 fill=%27%23cbd5e1%27 opacity=%270.1%27/%3E%3Cpath d=%27M-40,-20 L-40,20 L0,40 L40,20 L40,-20 L0,-40 Z%27 fill=%27%23cbd5e1%27 opacity=%270.8%27/%3E%3Ccircle cx=%270%27 cy=%27-10%27 r=%2715%27 fill=%27%23475569%27/%3E%3Cpath d=%27M-25,10 Q0,30 25,10%27 stroke=%27%23475569%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/g%3E%3Ctext x=%27400%27 y=%27480%27 font-family=%27Arial,sans-serif%27 font-size=%2724%27 fill=%27%2364748b%27 text-anchor=%27middle%27%3EJAVASCRIPT%3C/text%3E%3C/svg%3E';
+              }
+            }
+            
+            return {
+              ...repo,
+              readme: description,
+              projectImage: projectImage
+            };
+          })
+        );
         
+        // Apply overrides and organize
         const projectsWithOverrides = projectsWithData.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
         
@@ -129,10 +220,261 @@ export default function ProjectsSectionEnhanced() {
         console.log('✅ Projects loaded successfully!');
       } catch (err) {
         console.error('❌ Error fetching projects:', err);
-        console.log('🔄 Using fallback data...');
+        console.error('📝 Error details:', err.message);
         
+        // Fallback: show only local projects if GitHub fails
+        console.log('🔄 Falling back to local projects only...');
+        const localProjects = [];
+        Object.keys(projectsConfig.overrides).forEach(projectName => {
+          const override = projectsConfig.overrides[projectName];
+          if (override.isLocalProject) {
+            localProjects.push({
+              id: `local-${projectName}`,
+              name: projectName,
+              full_name: `local/${projectName}`,
+              description: override.customDescription || '',
+              html_url: override.liveUrl || '#',
+              homepage: override.liveUrl || '#',
+              stargazers_count: 0,
+              forks_count: 0,
+              language: override.tags?.[0] || 'Media',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              default_branch: 'main',
+            });
+          }
+        });
+        
+        // Add static projects as fallback
+        const staticFallbackProjects = [
+          {
+            id: 'portfolio-3d-fallback',
+            name: 'Portflio-3d',
+            full_name: 'Nour-ibrahem30/Portflio-3d',
+            description: 'Modern 3D portfolio website with interactive animations, built with React and Vite',
+            html_url: 'https://github.com/Nour-ibrahem30/Portflio-3d',
+            homepage: 'https://nour-ibrahem30.github.io/Portflio-3d/',
+            stargazers_count: 5, forks_count: 2, language: 'JavaScript',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/portfolio-3d.jpg',
+            readme: 'Modern 3D portfolio website with interactive animations, built with React, Vite, and Tailwind CSS.'
+          },
+          {
+            id: 'yly-reg-fallback',
+            name: 'YLY_Reg',
+            full_name: 'Nour-ibrahem30/YLY_Reg',
+            description: 'QR Code registration system for volunteers and events',
+            html_url: 'https://github.com/Nour-ibrahem30/YLY_Reg',
+            homepage: '',
+            stargazers_count: 2, forks_count: 0, language: 'JavaScript',
+            created_at: '2024-02-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/yly.jpg',
+            readme: 'QR Code registration system for managing volunteers and events.'
+          },
+          {
+            id: 'elgokh-fallback',
+            name: 'Elgokh',
+            full_name: 'Nour-ibrahem30/Elgokh',
+            description: 'Professional website project showcasing modern web development techniques',
+            html_url: 'https://github.com/Nour-ibrahem30/Elgokh',
+            homepage: '',
+            stargazers_count: 3, forks_count: 1, language: 'HTML',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/elgokh.jpg',
+            readme: 'Professional website project showcasing modern web development techniques and responsive design.'
+          },
+          {
+            id: 'creative-child-fallback',
+            name: 'Creative-child',
+            full_name: 'Nour-ibrahem30/Creative-child',
+            description: 'Creative and colorful website designed for children',
+            html_url: 'https://github.com/Nour-ibrahem30/Creative-child',
+            homepage: '',
+            stargazers_count: 2, forks_count: 0, language: 'CSS',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/creative-child.jpg',
+            readme: 'Creative and colorful website designed for children, featuring interactive elements and engaging UI.'
+          },
+          {
+            id: 'value-marketing-fallback',
+            name: 'intiative_Website_Value',
+            full_name: 'Nour-ibrahem30/intiative_Website_Value',
+            description: 'Custom React website built for Value Marketing company',
+            html_url: 'https://github.com/Nour-ibrahem30/intiative_Website_Value',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'React',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/value-marketing.jpg',
+            readme: 'Custom React website built for Value Marketing company. Features modern design, responsive layout, and smooth animations.'
+          },
+          {
+            id: 'sbs-fallback',
+            name: 'SBS-Website-Clone',
+            full_name: 'Nour-ibrahem30/SBS-Website-Clone',
+            description: 'Complete website for Shabab Betesaed Shabab organization',
+            html_url: 'https://github.com/Nour-ibrahem30/SBS-Website-Clone',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'React',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/sbs-website.jpg',
+            readme: 'Complete website for Shabab Betesaed Shabab organization. Built with React and TypeScript.'
+          },
+          {
+            id: 'green-studio-fallback',
+            name: 'Green-studio',
+            full_name: 'Nour-ibrahem30/Green-studio',
+            description: 'Elegant studio website with modern design and smooth animations',
+            html_url: 'https://github.com/Nour-ibrahem30/Green-studio',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/green-studio.jpg',
+            readme: 'Elegant studio website with modern design and smooth animations.'
+          },
+          {
+            id: 'vivadecor-fallback',
+            name: 'VivaDecor',
+            full_name: 'Nour-ibrahem30/VivaDecor',
+            description: 'Interior design showcase website',
+            html_url: 'https://github.com/Nour-ibrahem30/VivaDecor',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/viva-decor.jpg',
+            readme: 'Interior design showcase website built during Web Master internship.'
+          },
+          {
+            id: 'family-fallback',
+            name: 'Family',
+            full_name: 'Nour-ibrahem30/Family',
+            description: 'Family-oriented website project',
+            html_url: 'https://github.com/Nour-ibrahem30/Family',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            projectImage: '/Featured_Projects/family.jpg',
+            readme: 'Family-oriented website project with warm design and user-friendly interface.'
+          },
+        ];
+        
+        // Add other projects to fallback
+        const otherFallbackProjects = [
+          {
+            id: 'jadoo-fallback',
+            name: 'jadoo',
+            full_name: 'Nour-ibrahem30/jadoo',
+            description: 'Travel booking website built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/jadoo',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Travel booking website built during Web Master internship. Features responsive design and interactive UI.'
+          },
+          {
+            id: 'kalaly-fallback',
+            name: 'Kalaly-Project',
+            full_name: 'Nour-ibrahem30/Kalaly-Project',
+            description: 'E-commerce project built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/Kalaly-Project',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'E-commerce project built during Web Master internship. Includes product listings and shopping cart functionality.'
+          },
+          {
+            id: 'travel-fallback',
+            name: 'Travel',
+            full_name: 'Nour-ibrahem30/Travel',
+            description: 'Tourism website built during Web Master internship',
+            html_url: 'https://github.com/Nour-ibrahem30/Travel',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Tourism website built during Web Master internship. Includes destination listings and booking features.'
+          },
+          {
+            id: 'quiz-fallback',
+            name: 'Quiz-App',
+            full_name: 'Nour-ibrahem30/Quiz-App',
+            description: 'Interactive quiz application',
+            html_url: 'https://github.com/Nour-ibrahem30/Quiz-App',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Interactive quiz application with multiple choice questions and score tracking.'
+          },
+          {
+            id: 'memory-fallback',
+            name: 'Memory-Game',
+            full_name: 'Nour-ibrahem30/Memory-Game',
+            description: 'Memory card matching game',
+            html_url: 'https://github.com/Nour-ibrahem30/Memory-Game',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Memory card matching game with different difficulty levels.'
+          },
+          {
+            id: 'hangman-fallback',
+            name: 'Hangman',
+            full_name: 'Nour-ibrahem30/Hangman',
+            description: 'Classic Hangman word guessing game',
+            html_url: 'https://github.com/Nour-ibrahem30/Hangman',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Classic Hangman word guessing game with multiple categories.'
+          },
+          {
+            id: 'ecommerce-fallback',
+            name: 'E-Commerce',
+            full_name: 'Nour-ibrahem30/E-Commerce',
+            description: 'E-commerce website with shopping cart',
+            html_url: 'https://github.com/Nour-ibrahem30/E-Commerce',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
+            created_at: '2023-04-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'E-commerce website with product catalog and shopping cart functionality.'
+          },
+          {
+            id: 'kasper-fallback',
+            name: 'Kasper',
+            full_name: 'Nour-ibrahem30/Kasper',
+            description: 'Modern landing page template',
+            html_url: 'https://github.com/Nour-ibrahem30/Kasper',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Modern landing page template with clean design.'
+          },
+          {
+            id: 'leon-fallback',
+            name: 'Leon',
+            full_name: 'Nour-ibrahem30/Leon',
+            description: 'Minimal agency template',
+            html_url: 'https://github.com/Nour-ibrahem30/Leon',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Minimal agency template with responsive design.'
+          },
+          {
+            id: 'cyborg-fallback',
+            name: 'Cyborg-Gaming',
+            full_name: 'Nour-ibrahem30/Cyborg-Gaming',
+            description: 'Gaming website template',
+            html_url: 'https://github.com/Nour-ibrahem30/Cyborg-Gaming',
+            homepage: '',
+            stargazers_count: 1, forks_count: 0, language: 'HTML',
+            created_at: '2023-02-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
+            readme: 'Gaming website template with modern design.'
+          },
+        ];
+        
+        const fallbackProjects = [...localProjects, ...staticFallbackProjects, ...otherFallbackProjects];
         const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
+        
         setAllProjects(organized);
         setLoading(false);
       }
@@ -342,6 +684,7 @@ export default function ProjectsSectionEnhanced() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex flex-col items-center gap-4 mt-16"
               >
+                {/* Remaining count */}
                 <p className="text-gray-500 text-sm">
                   <span className="text-cyan-400 font-bold">{currentProjects.length - displayCount}</span> more projects remaining
                 </p>
@@ -452,7 +795,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
         </motion.div>
       </div>
 
-      {/* Content */}
+      {/* Content - Flex column with proper spacing */}
       <div className="p-6 flex flex-col flex-1 overflow-hidden">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -491,7 +834,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
           {project.readme}
         </p>
 
-        {/* Stats and Button */}
+        {/* Stats and Button Container - Fixed at bottom */}
         <div className="mt-auto space-y-4">
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <motion.span 
@@ -515,7 +858,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
             </motion.span>
           </div>
 
-          {/* View Project Button */}
+          {/* View Project Button - Consistent styling */}
           <motion.div
             className="relative overflow-hidden rounded-xl"
             whileHover={{ scale: 1.02 }}
@@ -563,3 +906,13 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
     </motion.div>
   );
 }
+
+
+
+
+
+
+
+
+
+
