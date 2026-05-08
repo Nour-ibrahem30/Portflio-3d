@@ -449,7 +449,6 @@ export default function Hero3D() {
             { value: '30+', label: 'Projects' },
             { value: '2+', label: 'Years' },
             { value: '50+', label: 'Students' },
-            { value: 'v1.0.3', label: 'Version' },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
