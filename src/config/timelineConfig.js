@@ -40,7 +40,7 @@ export const timelineConfig = [
     stats: {
       participants: 50,
       projectsCompleted: 0,
-      duration: '1 day',
+      duration: '1 week',
     },
   },
   {

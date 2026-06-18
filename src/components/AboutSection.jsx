@@ -512,52 +512,82 @@ const CERTS = [
   {
     title: 'Web Development',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-1.webp',
-    imageFallback: '/Generous/cert-1.jpg',
+    image: '/Generous/cert-1.jpg',
     color: 'from-blue-500 to-cyan-500',
     ringColor: '#06b6d4',
-    year: '2024',
+    year: '2025',
     icon: '🌐',
   },
   {
     title: 'Front-End Development',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-2.webp',
-    imageFallback: '/Generous/cert-2.jpg',
+    image: '/Generous/cert-2.jpg',
     color: 'from-green-500 to-emerald-500',
     ringColor: '#10b981',
-    year: '2024',
+    year: '2025',
     icon: '⚛️',
   },
   {
     title: 'Professional Certificate',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-3.webp',
-    imageFallback: '/Generous/cert-3.jpg',
+    image: '/Generous/cert-3.jpg',
     color: 'from-purple-500 to-violet-500',
     ringColor: '#8b5cf6',
-    year: '2024',
+    year: '2025',
     icon: '📜',
   },
   {
     title: 'Achievement Award',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-4.webp',
-    imageFallback: '/Generous/cert-4.png',
+    image: '/Generous/cert-4.png',
     color: 'from-yellow-500 to-orange-500',
     ringColor: '#f59e0b',
-    year: '2024',
+    year: '2025',
     icon: '🏆',
   },
 ];
 
 function CertificatesSection({ isInView }) {
   const [imgIdx, setImgIdx] = useState(null); // null = modal closed
+  const [activeStackIdx, setActiveStackIdx] = useState(0); // for card stack rotation
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 }); // for 3D effect
 
-  const openAt = (i) => setImgIdx(i);
+  const openAt = (i) => {
+    console.log('🔴 Opening image', i, 'current imgIdx:', imgIdx);
+    setImgIdx(i);
+    console.log('🟢 After setImgIdx, state should update');
+  };
   const close  = ()  => setImgIdx(null);
   const prev   = ()  => setImgIdx(i => (i - 1 + CERTS.length) % CERTS.length);
   const next   = ()  => setImgIdx(i => (i + 1) % CERTS.length);
+
+  // Handle mouse move for 3D effect
+  const handleMouseMove = (e) => {
+    if (imgIdx === null) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+    setMousePos({ x: x * 15, y: y * 15 });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
+
+  // Auto-rotate card stack
+  useEffect(() => {
+    console.log('imgIdx changed to:', imgIdx);
+    if (imgIdx !== null) {
+      console.log('Modal should show, imgIdx is:', imgIdx);
+      return; // Stop rotation if modal is open
+    }
+    
+    const timer = setInterval(() => {
+      setActiveStackIdx(prev => (prev + 1) % CERTS.length);
+    }, 3500); // Change card every 3.5 seconds
+
+    return () => clearInterval(timer);
+  }, [imgIdx]);
 
   // keyboard nav
   useEffect(() => {
@@ -614,194 +644,481 @@ function CertificatesSection({ isInView }) {
         />
       </div>
 
-      {/* Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {CERTS.map((cert, i) => (
-          <motion.div
-            key={cert.title}
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ delay: 1.9 + i * 0.1, duration: 0.5 }}
-            whileHover={{ y: -8 }}
-            onClick={() => openAt(i)}
-            className="group relative bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 rounded-2xl overflow-hidden shadow-lg cursor-pointer transition-all duration-300"
-          >
-            {/* top color bar */}
-            <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${cert.color} opacity-0 group-hover:opacity-100 transition-opacity z-10`} />
+      {/* ──────── MOBILE: Card Stack ────────── */}
+      <div className="md:hidden flex flex-col items-center justify-center mb-12">
+        {/* Stacked Cards Container - Mobile Only */}
+        <div className="relative w-80 h-96">
+          {CERTS.map((cert, i) => {
+            const positionInStack = (i - activeStackIdx + CERTS.length) % CERTS.length;
+            const isActive = positionInStack === 0;
+            
+            return (
+              <motion.div
+                key={`mobile-${cert.title}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.9 }}
+                className="absolute w-full h-full cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openAt(i);
+                }}
+                style={{ pointerEvents: 'auto' }}
+              >
+                <motion.div
+                  animate={{
+                    x: isActive ? 0 : 0,
+                    y: isActive ? 0 : 40,
+                    scale: isActive ? 1 : 0.85,
+                    zIndex: isActive ? 30 : 10,
+                    opacity: isActive ? 1 : 0, // Hidden completely when not active
+                    filter: isActive ? 'blur(0px)' : 'blur(8px)',
+                  }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="w-full h-full cursor-pointer"
+                >
+                  {/* Card */}
+                  <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl group bg-zinc-900/60 border border-zinc-800 transition-all duration-300">
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${cert.color} z-10`} />
+                    
+                    <div className="relative w-full h-4/5 overflow-hidden bg-zinc-800">
+                      <img
+                        src={cert.image}
+                        alt={cert.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        decoding="async"
+                        width="320"
+                        height="240"
+                      />
+                      <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
+                        <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+                          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                          </svg>
+                        </div>
+                        <span className="text-white text-xs font-bold tracking-widest uppercase">View</span>
+                      </div>
+                    </div>
 
-            {/* Image */}
-            <div className="relative h-52 overflow-hidden bg-zinc-800">
-              <picture>
-                <source srcSet={cert.image} type="image/webp" />
-                <img
-                  src={cert.imageFallback}
-                  alt={cert.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                  decoding="async"
-                  width="400"
-                  height="208"
-                />
-              </picture>
-              {/* hover overlay */}
-              <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
-                <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                  </svg>
-                </div>
-                <span className="text-white text-xs font-bold tracking-widest uppercase">View</span>
-              </div>
-              <div className={`absolute inset-0 bg-gradient-to-t ${cert.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-            </div>
+                    <div className="p-4 relative h-1/5 flex flex-col justify-center bg-gradient-to-b from-zinc-900/40 to-zinc-900/80">
+                      <div className="relative flex items-start justify-between gap-2">
+                        <div>
+                          <div className="text-white font-bold text-sm leading-tight">{cert.title}</div>
+                          <div className="text-gray-500 text-xs mt-0.5">{cert.issuer}</div>
+                        </div>
+                        <span className={`text-xs font-bold bg-gradient-to-r ${cert.color} bg-clip-text text-transparent flex-shrink-0`}>
+                          {cert.year}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
 
-            {/* Info */}
-            <div className="p-4 relative overflow-hidden">
-              <div className={`absolute inset-0 bg-gradient-to-br ${cert.color} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
-              <div className="relative flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-white font-bold text-sm leading-tight">{cert.title}</div>
-                  <div className="text-gray-500 text-xs mt-0.5">{cert.issuer}</div>
-                </div>
-                <span className={`text-xs font-bold bg-gradient-to-r ${cert.color} bg-clip-text text-transparent flex-shrink-0`}>
-                  {cert.year}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+        {/* Dots Indicator - Mobile */}
+        <div className="flex gap-2 mt-8">
+          {CERTS.map((_, i) => (
+            <motion.button
+              key={`dot-${i}`}
+              animate={{
+                scale: i === activeStackIdx ? 1.2 : 0.8,
+                opacity: i === activeStackIdx ? 1 : 0.4,
+              }}
+              onClick={() => setActiveStackIdx(i)}
+              className="w-2 h-2 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 cursor-pointer"
+              aria-label={`Go to certificate ${i + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* ── Modal via Portal ── */}
-      <AnimatePresence>
-        {imgIdx !== null && createPortal(
-          <motion.div
-            key="cert-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/93 backdrop-blur-2xl p-4 md:p-8"
-            onClick={close}
-          >
+      {/* ──────── DESKTOP: Carousel ────────── */}
+      <div className="hidden md:block">
+        {/* Carousel Container with 3D Perspective */}
+        <div className="relative w-full px-12" style={{ perspective: '1000px' }}>
+          {/* Main carousel content */}
+          <div className="relative h-auto overflow-hidden">
             <motion.div
-              initial={{ opacity: 0, scale: 0.88, y: 30 }}
-              animate={{ opacity: 1, scale: 1,    y: 0  }}
-              exit   ={{ opacity: 0, scale: 0.88, y: 30 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700/80 shadow-2xl"
+              className="flex gap-8"
+              animate={{ x: -activeStackIdx * (100 / 3) + '%' }}
+              transition={{ duration: 0.7, ease: "easeInOut" }}
+              style={{ 
+                display: 'flex',
+              }}
             >
-              {/* gradient top bar */}
-              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${CERTS[imgIdx].color}`} />
+              {CERTS.map((cert, i) => {
+                const positionInStack = (i - activeStackIdx + CERTS.length) % CERTS.length;
+                const isActive = positionInStack === 0;
+                const isNext = positionInStack === 1;
+                const isPrev = positionInStack === CERTS.length - 1;
 
-              {/* Header row */}
-              <div className="flex items-center justify-between px-6 pt-5 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${CERTS[imgIdx].color} flex items-center justify-center text-xl shadow-lg`}>
-                    {CERTS[imgIdx].icon}
+                return (
+                  <motion.div
+                    key={`carousel-${cert.title}`}
+                    className="flex-shrink-0 w-1/3 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAt(i);
+                    }}
+                    animate={{
+                      scale: isActive ? 1 : isNext || isPrev ? 0.88 : 0.8,
+                      opacity: isActive ? 1 : isNext || isPrev ? 0.7 : 0.4,
+                      rotateY: isNext ? 15 : isPrev ? -15 : 0,
+                      z: isActive ? 30 : isNext ? 20 : isPrev ? 20 : 10,
+                    }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      transformOrigin: 'center center',
+                      pointerEvents: 'auto',
+                    }}
+                  >
+                    <motion.div
+                      whileHover={isActive ? { scale: 1.05, y: -12 } : {}}
+                      className="group relative rounded-3xl overflow-hidden shadow-2xl bg-zinc-900/80 border border-zinc-700/60 hover:border-zinc-500 transition-all duration-300 h-full"
+                    >
+                      {/* Top gradient bar */}
+                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${cert.color} z-10`} />
+                      
+                      {/* Image container */}
+                      <div className="relative w-full pt-[100%] overflow-hidden bg-zinc-800">
+                        <img
+                          src={cert.image}
+                          alt={cert.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-600"
+                          loading="lazy"
+                          decoding="async"
+                          width="600"
+                          height="600"
+                        />
+                        {/* Overlay gradient */}
+                        <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                        
+                        {/* Hover icon */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center"
+                          >
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                            </svg>
+                          </motion.div>
+                          <span className="text-white text-sm font-bold tracking-widest uppercase">View Full</span>
+                        </div>
+                      </div>
+
+                      {/* Info section - overlaid on bottom of image */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 to-transparent p-5 pt-12">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <div className={`text-lg font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:${cert.color} group-hover:bg-clip-text transition-all duration-300`}>
+                                {cert.title}
+                              </div>
+                              <div className="text-gray-400 text-sm mt-1 group-hover:text-gray-300 transition-colors">
+                                {cert.issuer}
+                              </div>
+                            </div>
+                            <motion.div 
+                              className={`flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br ${cert.color} text-white font-bold text-sm flex-shrink-0 shadow-lg`}
+                            >
+                              {cert.year.slice(-2)}
+                            </motion.div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+
+          {/* Navigation Buttons - Desktop */}
+          <motion.button
+            whileHover={{ scale: 1.15, x: -4 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setActiveStackIdx(prev => (prev - 1 + CERTS.length) % CERTS.length)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow group"
+            aria-label="Previous"
+          >
+            <svg className="w-7 h-7 text-white group-hover:scale-125 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.15, x: 4 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setActiveStackIdx(prev => (prev + 1) % CERTS.length)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow group"
+            aria-label="Next"
+          >
+            <svg className="w-7 h-7 text-white group-hover:scale-125 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </motion.button>
+        </div>
+
+        {/* Indicator Dots with enhanced styling */}
+        <div className="flex justify-center gap-3 mt-10">
+          {CERTS.map((cert, i) => (
+            <motion.button
+              key={`desktop-dot-${i}`}
+              animate={{
+                scale: i === activeStackIdx ? 1.4 : 0.8,
+                opacity: i === activeStackIdx ? 1 : 0.35,
+              }}
+              whileHover={{ scale: i === activeStackIdx ? 1.4 : 1 }}
+              onClick={() => setActiveStackIdx(i)}
+              className="relative group"
+              aria-label={`Go to certificate ${i + 1}`}
+            >
+              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 shadow-lg cursor-pointer" />
+              {i === activeStackIdx && (
+                <motion.div 
+                  layoutId="active-dot"
+                  className="absolute inset-0 rounded-full border-2 border-yellow-400/50"
+                  initial={false}
+                  transition={{ duration: 0.3 }}
+                />
+              )}
+              {/* Tooltip */}
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                {cert.title}
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 3D Interactive Modal via Portal ── */}
+      {imgIdx !== null && createPortal(
+        <motion.div
+          key="cert-3d-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-4 md:p-8"
+          onClick={close}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ perspective: '1200px' }}
+        >
+            {/* 3D Card Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85, rotateX: -20 }}
+              animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+              exit={{ opacity: 0, scale: 0.85, rotateX: -20 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl"
+              style={{
+                transformStyle: 'preserve-3d',
+                transform: `rotateX(${mousePos.y * 0.3}deg) rotateY(${mousePos.x * 0.3}deg)`,
+              }}
+            >
+              {/* Main Content Container */}
+              <div className="relative bg-gradient-to-br from-zinc-900 via-zinc-850 to-black rounded-3xl overflow-hidden border border-zinc-700/50 shadow-2xl" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(249,115,22,0.1)' }}>
+                
+                {/* Animated gradient border */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${CERTS[imgIdx].color} opacity-0 group-hover:opacity-20 transition-opacity duration-500 pointer-events-none rounded-3xl`} />
+                
+                {/* Top color bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${CERTS[imgIdx].color} z-10`} />
+
+                {/* Close Button - Top Right */}
+                <motion.button
+                  whileHover={{ scale: 1.15, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={close}
+                  className="absolute top-6 right-6 z-20 w-11 h-11 rounded-full bg-zinc-800/80 hover:bg-red-500/80 backdrop-blur-md border border-zinc-600/50 flex items-center justify-center transition-all duration-300 shadow-lg"
+                  aria-label="Close"
+                >
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+
+                {/* Grid Layout */}
+                <div className="grid md:grid-cols-5 gap-6 p-8 md:p-10 items-start">
+                  
+                  {/* Image Section - 3 columns */}
+                  <div className="md:col-span-3">
+                    <div className="relative rounded-2xl overflow-hidden bg-black/50 border border-zinc-700/50 group" style={{ aspectRatio: '1/1' }}>
+                      {/* 3D Image Container */}
+                      <motion.div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{
+                          transformStyle: 'preserve-3d',
+                          transform: `translateZ(20px) scale(${1 + Math.abs(mousePos.x) * 0.01 + Math.abs(mousePos.y) * 0.01})`,
+                        }}
+                        animate={{
+                          filter: `brightness(${1 + Math.abs(mousePos.x) * 0.02 + Math.abs(mousePos.y) * 0.02})`,
+                        }}
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.img
+                            key={imgIdx}
+                            src={CERTS[imgIdx].image}
+                            alt={CERTS[imgIdx].title}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.4 }}
+                            className="w-full h-full object-contain drop-shadow-2xl"
+                            loading="eager"
+                            decoding="async"
+                          />
+                        </AnimatePresence>
+                      </motion.div>
+
+                      {/* Shine Effect */}
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                          transform: `translateX(${mousePos.x * 2}px) translateY(${mousePos.y * 2}px)`,
+                        }}
+                      />
+                    </div>
+
+                    {/* Navigation Arrows Below Image */}
+                    <div className="flex justify-between mt-6 gap-4">
+                      <motion.button
+                        whileHover={{ scale: 1.1, x: -2 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={prev}
+                        className="flex-1 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                        aria-label="Previous"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Previous
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1, x: 2 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={next}
+                        className="flex-1 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                        aria-label="Next"
+                      >
+                        Next
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </motion.button>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-white font-bold text-sm leading-tight">{CERTS[imgIdx].title}</div>
-                    <div className="text-gray-500 text-xs">{CERTS[imgIdx].issuer} · {CERTS[imgIdx].year}</div>
+
+                  {/* Info Section - 2 columns */}
+                  <div className="md:col-span-2 space-y-6">
+                    {/* Header Info */}
+                    <motion.div
+                      key={`info-${imgIdx}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="space-y-4"
+                    >
+                      {/* Icon and Counter */}
+                      <div className="flex items-start justify-between">
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${CERTS[imgIdx].color} flex items-center justify-center text-4xl shadow-xl`}>
+                          {CERTS[imgIdx].icon}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                            {imgIdx + 1}
+                          </div>
+                          <div className="text-gray-500 text-sm">of {CERTS.length}</div>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <div>
+                        <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                          {CERTS[imgIdx].title}
+                        </h2>
+                      </div>
+
+                      {/* Issuer and Year */}
+                      <div className="space-y-2 pt-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-yellow-500" />
+                          <span className="text-gray-300 font-medium">{CERTS[imgIdx].issuer}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-orange-500" />
+                          <span className="text-gray-400">Year: <span className="text-white font-semibold">{CERTS[imgIdx].year}</span></span>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+
+                    {/* Thumbnails */}
+                    <div>
+                      <p className="text-gray-400 text-sm font-semibold mb-3">All Certificates</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {CERTS.map((c, i) => (
+                          <motion.button
+                            key={`thumb-${i}`}
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setImgIdx(i)}
+                            className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                              i === imgIdx 
+                                ? `border-yellow-500 shadow-lg shadow-yellow-500/50` 
+                                : 'border-zinc-700/50 hover:border-zinc-600'
+                            }`}
+                          >
+                            <img
+                              src={c.image}
+                              alt={c.title}
+                              className="w-full aspect-square object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                            {i === imgIdx && (
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-600 text-sm font-semibold tabular-nums">
-                    {imgIdx + 1} / {CERTS.length}
+
+                {/* Footer - Keyboard Hints */}
+                <div className="hidden md:flex items-center justify-center gap-6 pb-6 text-zinc-600 text-xs border-t border-zinc-800/50 mt-6 pt-6 mx-8">
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-2 py-1 bg-zinc-800/50 border border-zinc-700 rounded text-[10px]">←</kbd>
+                    <kbd className="px-2 py-1 bg-zinc-800/50 border border-zinc-700 rounded text-[10px]">→</kbd>
+                    <span>Navigate</span>
                   </span>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={close}
-                    className="w-9 h-9 rounded-full bg-zinc-800 hover:bg-red-500/80 border border-zinc-700 flex items-center justify-center transition-colors"
-                    aria-label="Close"
-                  >
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </motion.button>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-2 py-1 bg-zinc-800/50 border border-zinc-700 rounded text-[10px]">ESC</kbd>
+                    <span>Close</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span>🖱️ Move mouse for 3D effect</span>
+                  </span>
                 </div>
-              </div>
-
-              {/* Main image */}
-              <div className="relative mx-4 mb-4 rounded-2xl overflow-hidden bg-zinc-800 border border-zinc-700/50">
-                <AnimatePresence mode="wait">
-                  <motion.picture
-                    key={imgIdx}
-                    initial={{ opacity: 0, scale: 1.03 }}
-                    animate={{ opacity: 1, scale: 1    }}
-                    exit  ={{ opacity: 0, scale: 0.97  }}
-                    transition={{ duration: 0.28 }}
-                    className="block w-full"
-                  >
-                    <source srcSet={CERTS[imgIdx].image} type="image/webp" />
-                    <img
-                      src={CERTS[imgIdx].imageFallback}
-                      alt={CERTS[imgIdx].title}
-                      className="w-full object-contain max-h-[55vh]"
-                      loading="eager"
-                      decoding="async"
-                    />
-                  </motion.picture>
-                </AnimatePresence>
-
-                {/* Prev / Next arrows */}
-                <motion.button
-                  whileHover={{ scale: 1.1, x: -2 }} whileTap={{ scale: 0.9 }}
-                  onClick={prev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/65 hover:bg-black/90 border border-white/10 flex items-center justify-center backdrop-blur-sm"
-                  aria-label="Previous"
-                >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.1, x: 2 }} whileTap={{ scale: 0.9 }}
-                  onClick={next}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/65 hover:bg-black/90 border border-white/10 flex items-center justify-center backdrop-blur-sm"
-                  aria-label="Next"
-                >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                  </svg>
-                </motion.button>
-              </div>
-
-              {/* Thumbnail strip */}
-              <div className="flex justify-center gap-2.5 px-4 pb-5">
-                {CERTS.map((c, i) => (
-                  <motion.button
-                    key={i}
-                    whileHover={{ scale: 1.08, y: -3 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setImgIdx(i)}
-                    style={i === imgIdx ? { boxShadow: `0 0 0 2px ${c.ringColor}` } : {}}
-                    className={`relative rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200 ${
-                      i === imgIdx ? 'w-16 h-12 opacity-100' : 'w-12 h-9 opacity-35 hover:opacity-65'
-                    }`}
-                    aria-label={c.title}
-                  >
-                    <picture>
-                      <source srcSet={c.image} type="image/webp" />
-                      <img src={c.imageFallback} alt={c.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    </picture>
-                  </motion.button>
-                ))}
-              </div>
-
-              {/* keyboard hint */}
-              <div className="hidden md:flex items-center justify-center gap-5 pb-4 text-zinc-600 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-[10px]">←</kbd>
-                  <kbd className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-[10px]">→</kbd>
-                  Navigate
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <kbd className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-[10px]">ESC</kbd>
-                  Close
-                </span>
               </div>
             </motion.div>
           </motion.div>,
