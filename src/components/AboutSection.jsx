@@ -512,7 +512,8 @@ const CERTS = [
   {
     title: 'Web Development',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-1.jpg',
+    image: '/Generous/cert-1.webp',
+    imageFallback: '/Generous/cert-1.jpg',
     color: 'from-blue-500 to-cyan-500',
     ringColor: '#06b6d4',
     year: '2024',
@@ -521,7 +522,8 @@ const CERTS = [
   {
     title: 'Front-End Development',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-2.jpg',
+    image: '/Generous/cert-2.webp',
+    imageFallback: '/Generous/cert-2.jpg',
     color: 'from-green-500 to-emerald-500',
     ringColor: '#10b981',
     year: '2024',
@@ -530,7 +532,8 @@ const CERTS = [
   {
     title: 'Professional Certificate',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-3.jpg',
+    image: '/Generous/cert-3.webp',
+    imageFallback: '/Generous/cert-3.jpg',
     color: 'from-purple-500 to-violet-500',
     ringColor: '#8b5cf6',
     year: '2024',
@@ -539,7 +542,8 @@ const CERTS = [
   {
     title: 'Achievement Award',
     issuer: 'Generous Academy',
-    image: '/Generous/cert-4.png',
+    image: '/Generous/cert-4.webp',
+    imageFallback: '/Generous/cert-4.png',
     color: 'from-yellow-500 to-orange-500',
     ringColor: '#f59e0b',
     year: '2024',
@@ -627,12 +631,18 @@ function CertificatesSection({ isInView }) {
 
             {/* Image */}
             <div className="relative h-52 overflow-hidden bg-zinc-800">
-              <img
-                src={cert.image}
-                alt={cert.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
+              <picture>
+                <source srcSet={cert.image} type="image/webp" />
+                <img
+                  src={cert.imageFallback}
+                  alt={cert.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  decoding="async"
+                  width="400"
+                  height="208"
+                />
+              </picture>
               {/* hover overlay */}
               <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
                 <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center">
@@ -717,17 +727,23 @@ function CertificatesSection({ isInView }) {
               {/* Main image */}
               <div className="relative mx-4 mb-4 rounded-2xl overflow-hidden bg-zinc-800 border border-zinc-700/50">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <motion.picture
                     key={imgIdx}
-                    src={CERTS[imgIdx].image}
-                    alt={CERTS[imgIdx].title}
                     initial={{ opacity: 0, scale: 1.03 }}
                     animate={{ opacity: 1, scale: 1    }}
                     exit  ={{ opacity: 0, scale: 0.97  }}
                     transition={{ duration: 0.28 }}
-                    className="w-full object-contain max-h-[55vh]"
-                    loading="lazy"
-                  />
+                    className="block w-full"
+                  >
+                    <source srcSet={CERTS[imgIdx].image} type="image/webp" />
+                    <img
+                      src={CERTS[imgIdx].imageFallback}
+                      alt={CERTS[imgIdx].title}
+                      className="w-full object-contain max-h-[55vh]"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </motion.picture>
                 </AnimatePresence>
 
                 {/* Prev / Next arrows */}
@@ -767,7 +783,10 @@ function CertificatesSection({ isInView }) {
                     }`}
                     aria-label={c.title}
                   >
-                    <img src={c.image} alt={c.title} className="w-full h-full object-cover" loading="lazy" />
+                    <picture>
+                      <source srcSet={c.image} type="image/webp" />
+                      <img src={c.imageFallback} alt={c.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    </picture>
                   </motion.button>
                 ))}
               </div>

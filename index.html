@@ -29,12 +29,15 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     
-    <!-- Fonts - Optimized with preload -->
+    <!-- Fonts - Non-render-blocking with preload -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Load font CSS immediately -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Preload the font CSS as high priority but non-blocking -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"></noscript>
     
+    <!-- Preconnect GitHub API to save 460ms on LCP -->
+    <link rel="preconnect" href="https://api.github.com">
     <!-- Preload critical resources -->
     <link rel="dns-prefetch" href="https://api.github.com">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
@@ -53,7 +56,7 @@
         size-adjust: 107%;
       }
       body {
-        font-family: 'Inter-fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Inter', 'Inter-fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       }
       /* Critical CSS for initial render */
       #root { min-height: 100vh; background: #000; }
