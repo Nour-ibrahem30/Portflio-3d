@@ -255,15 +255,14 @@ export default function Hero3D() {
     };
   }, [mouseX, mouseY]);
 
-  // GSAP Animations for content - Optimized with defer
+  // GSAP Animations for content - Optimized, no opacity:0 on LCP element
   useEffect(() => {
-    // Defer animation until after initial render
     const timeoutId = setTimeout(() => {
-      const tl = gsap.timeline({ 
-        delay: 0.2,
+      const tl = gsap.timeline({
+        delay: 0.1,
         defaults: { force3D: true }
       });
-      
+
       tl.from('.hero-badge', {
         scale: 0,
         opacity: 0,
@@ -272,19 +271,12 @@ export default function Hero3D() {
         clearProps: 'all'
       })
       .from('.hero-title', {
-        y: 60,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power2.out',
-        clearProps: 'all'
-      }, '-=0.1')
-      .from('.hero-subtitle', {
-        y: 30,
-        opacity: 0,
+        y: 40,
         duration: 0.5,
         ease: 'power2.out',
         clearProps: 'all'
-      }, '-=0.2')
+      }, '-=0.1')
+      // hero-subtitle starts visible — no opacity animation to avoid LCP delay
       .from('.hero-cta', {
         scale: 0,
         opacity: 0,
@@ -292,7 +284,7 @@ export default function Hero3D() {
         stagger: 0.06,
         ease: 'back.out(1.3)'
       }, '-=0.2');
-    }, 150);
+    }, 100);
 
     return () => clearTimeout(timeoutId);
   }, []);
@@ -370,11 +362,8 @@ export default function Hero3D() {
           }}
         >
           <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-bold leading-none">
-            <motion.div
+            <div
               className="inline-block"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
               style={{
                 background: 'linear-gradient(90deg, #c084fc 0%, #22d3ee 100%)',
                 WebkitBackgroundClip: 'text',
@@ -383,13 +372,10 @@ export default function Hero3D() {
               }}
             >
               NOUR
-            </motion.div>
+            </div>
             <br />
-            <motion.div
+            <div
               className="inline-block mt-2"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
               style={{
                 background: 'linear-gradient(90deg, #22d3ee 0%, #475569 50%, #60a5fa 100%)',
                 WebkitBackgroundClip: 'text',
@@ -398,35 +384,29 @@ export default function Hero3D() {
               }}
             >
               IBRAHEM
-            </motion.div>
+            </div>
           </h1>
         </motion.div>
 
         {/* Subtitle */}
         <div className="hero-subtitle space-y-8 mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
+          <h2
             className="text-lg sm:text-xl md:text-2xl text-gray-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-light"
           >
             <TypewriterText />
-          </motion.h2>
+          </h2>
 
-          {/* Tech Stack Pills */}
+          {/* Tech Stack Pills — no animation to avoid CLS */}
           <div className="flex items-center justify-center gap-4 flex-wrap">
-            {['React', 'TypeScript', 'Tailwind', 'GSAP'].map((tech, i) => (
-              <motion.div
+            {['React', 'TypeScript', 'Tailwind', 'GSAP'].map((tech) => (
+              <div
                 key={tech}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 + i * 0.1 }}
                 className="px-5 py-2.5 bg-zinc-900/80 border border-zinc-800 rounded-full backdrop-blur-sm"
               >
                 <span className="text-sm font-medium text-gray-300">
                   {tech}
                 </span>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -480,22 +460,16 @@ export default function Hero3D() {
         </div>
 
         {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
+        <div
           className="flex items-center justify-center gap-8 md:gap-16 flex-wrap"
         >
           {[
             { value: '30+', label: 'Projects' },
             { value: '2+', label: 'Years' },
             { value: '50+', label: 'Students' },
-          ].map((stat, i) => (
-            <motion.div
+          ].map((stat) => (
+            <div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.7 + i * 0.1 }}
               className="text-center"
             >
               <div className="text-4xl md:text-5xl font-bold text-white mb-1">
@@ -504,9 +478,9 @@ export default function Hero3D() {
               <div className="text-gray-500 uppercase tracking-wider text-xs font-medium">
                 {stat.label}
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
 
       </div>

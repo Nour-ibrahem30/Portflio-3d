@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import gsap from 'gsap';
-import { db } from '../firebase/config';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+// Lazy-load Firebase only when ContactSection mounts (not in initial bundle)
+let _db = null;
+async function getDB() {
+  if (_db) return _db;
+  const { db } = await import('../firebase/config');
+  _db = db;
+  return _db;
+}
 
 export default function ContactSection() {
   const sectionRef = useRef(null);
@@ -44,10 +51,11 @@ export default function ContactSection() {
     setStatus('');
 
     try {
-      // Check if Firebase is initialized
-      if (!db) {
-        throw new Error('Firebase is not initialized');
-      }
+      // Lazy-load Firebase only on first submit
+      const [{ collection, addDoc, serverTimestamp }, db] = await Promise.all([
+        import('firebase/firestore'),
+        getDB(),
+      ]);
 
       // Save to Firestore
       const docRef = await addDoc(collection(db, 'contacts'), {
