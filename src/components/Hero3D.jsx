@@ -2,6 +2,41 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import gsap from 'gsap';
 
+// Typewriter Text Component
+function TypewriterText() {
+  const texts = ['Front-End Developer', 'React Developer', 'UI/UX Engineer', 'Problem Solver'];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayText, setDisplayText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [charIndex, setCharIndex] = useState(0);
+
+  useEffect(() => {
+    const currentText = texts[currentIndex];
+    let timeout;
+
+    if (!isDeleting && charIndex < currentText.length) {
+      timeout = setTimeout(() => setCharIndex(prev => prev + 1), 80);
+    } else if (!isDeleting && charIndex === currentText.length) {
+      timeout = setTimeout(() => setIsDeleting(true), 2000);
+    } else if (isDeleting && charIndex > 0) {
+      timeout = setTimeout(() => setCharIndex(prev => prev - 1), 40);
+    } else if (isDeleting && charIndex === 0) {
+      setIsDeleting(false);
+      setCurrentIndex(prev => (prev + 1) % texts.length);
+    }
+
+    setDisplayText(currentText.substring(0, charIndex));
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, currentIndex]);
+
+  return (
+    <span>
+      {displayText}
+      <span className="animate-pulse">|</span>
+    </span>
+  );
+}
+
 // Constellation Animation Component - Optimized
 function HeroConstellation({ children }) {
   const canvasRef = useRef(null);
@@ -11,6 +46,8 @@ function HeroConstellation({ children }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Skip on mobile — saves battery & CPU
+    if (window.innerWidth < 768) return;
 
     const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
     canvas.width = window.innerWidth;
@@ -194,6 +231,10 @@ export default function Hero3D() {
   const mouseX = useSpring(0, springConfig);
   const mouseY = useSpring(0, springConfig);
 
+  // Pre-compute title tilt transforms (must be at top level, not inside JSX)
+  const titleRotateX = useTransform(mouseY, [-50, 50], [2, -2]);
+  const titleRotateY = useTransform(mouseX, [-50, 50], [-2, 2]);
+
   useEffect(() => {
     let rafId;
     const handleMouseMove = (e) => {
@@ -323,12 +364,12 @@ export default function Hero3D() {
         <motion.div
           className="hero-title mb-10"
           style={{
-            rotateX: useTransform(mouseY, [-50, 50], [2, -2]),
-            rotateY: useTransform(mouseX, [-50, 50], [-2, 2]),
+            rotateX: titleRotateX,
+            rotateY: titleRotateY,
             willChange: 'transform'
           }}
         >
-          <h1 className="text-7xl md:text-8xl lg:text-[9rem] font-bold leading-none">
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-bold leading-none">
             <motion.div
               className="inline-block"
               initial={{ opacity: 0, y: 50 }}
@@ -367,9 +408,9 @@ export default function Hero3D() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            className="text-xl md:text-2xl text-gray-400 uppercase tracking-[0.3em] font-light"
+            className="text-lg sm:text-xl md:text-2xl text-gray-400 uppercase tracking-[0.2em] sm:tracking-[0.3em] font-light"
           >
-            Front-End Developer
+            <TypewriterText />
           </motion.h2>
 
           {/* Tech Stack Pills */}
@@ -470,27 +511,21 @@ export default function Hero3D() {
 
       </div>
 
-      {/* Floating Elements */}
-      {[...Array(10)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0, 1, 0],
-            scale: [0, 1.5, 0],
-          }}
-          transition={{
-            duration: Math.random() * 3 + 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-          }}
-        />
-      ))}
+      {/* Floating Elements — desktop only, seeded positions to avoid hydration mismatch */}
+      {typeof window !== 'undefined' && window.innerWidth >= 768 && (
+        [...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full pointer-events-none"
+            style={{
+              left: `${10 + i * 15}%`,
+              top:  `${15 + (i % 3) * 25}%`,
+            }}
+            animate={{ y: [0, -24, 0], opacity: [0, 0.8, 0], scale: [0, 1.2, 0] }}
+            transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.4 }}
+          />
+        ))
+      )}
     </motion.section>
   );
 }

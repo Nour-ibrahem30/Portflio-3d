@@ -1,13 +1,13 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense, useCallback } from 'react';
 import React from 'react';
+import CustomCursor from './components/CustomCursor';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageLoader from './components/PageLoader';
 import SEO from './components/SEO';
 import Navigation from './components/Navigation';
 import HeroSection from './components/Hero3D';
-import MobileWarning from './components/MobileWarning';
-import { getCSSGradient, getGradient } from './config/colorsConfig';
+import { getCSSGradient } from './config/colorsConfig';
 import usePerformance from './hooks/usePerformance';
 import './index.css';
 
@@ -26,6 +26,34 @@ const SectionLoader = React.memo(() => (
   </div>
 ));
 SectionLoader.displayName = 'SectionLoader';
+
+// Scroll Progress Bar
+const ScrollProgressBar = React.memo(() => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+      setScrollProgress(progress);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  return (
+    <div className="fixed top-0 left-0 w-full h-1 z-[100] bg-zinc-900">
+      <div 
+        className="h-full transition-all duration-100"
+        style={{ 
+          width: `${scrollProgress}%`,
+          background: 'linear-gradient(90deg, #1e3a8a 0%, #3b82f6 50%, #22d3ee 100%)'
+        }}
+      />
+    </div>
+  );
+});
+ScrollProgressBar.displayName = 'ScrollProgressBar';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -84,7 +112,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SEO />
-      <MobileWarning />
+      <CustomCursor />
       
       <AnimatePresence>
         {isLoading && (
@@ -99,6 +127,7 @@ function App() {
         className="relative min-h-screen bg-black text-white w-full"
         style={{ willChange: 'opacity' }}
       >
+        <ScrollProgressBar />
         {/* Version Badge */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
@@ -123,7 +152,7 @@ function App() {
                 style={{ backgroundColor: '#4ca1af', boxShadow: '0 0 10px rgba(76, 161, 175, 0.5)' }}
               />
               <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                v1.0.3
+                v1.0.4
               </span>
             </div>
           </div>
@@ -144,7 +173,7 @@ function App() {
           onClick={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
+          className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all"
           style={{ 
             background: getCSSGradient(1),
             boxShadow: '0 10px 25px rgba(32, 58, 67, 0.5)'
@@ -182,7 +211,7 @@ function App() {
           </Suspense>
         </main>
 
-        <footer className="relative z-10 py-12 px-6 text-center border-t border-gray-900 bg-black">
+        <footer className="relative z-10 py-10 md:py-12 px-4 sm:px-6 text-center border-t border-gray-900 bg-black">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
               <div className="text-2xl font-bold bg-clip-text text-transparent" style={{ backgroundImage: getCSSGradient(1) }}>
@@ -232,10 +261,10 @@ function App() {
             </div>
             
             <p className="text-gray-600 uppercase tracking-widest text-sm">
-              © 2025 Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
+              © {new Date().getFullYear()} Nour Ibrahem Mohamed — Front-End Developer | Cairo, Egypt
             </p>
             <p className="text-gray-700 text-xs mt-2">
-              v1.0.3 — Production Ready
+              v1.0.4 — Production Ready
             </p>
           </div>
         </footer>

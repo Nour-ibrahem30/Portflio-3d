@@ -78,9 +78,9 @@ export default function FavouriteVideosGallery() {
   };
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black">
-      {/* Background Effects */}
-      <div className="absolute inset-0 opacity-20 -z-10">
+    <section ref={sectionRef} className="relative min-h-screen py-20 md:py-32 px-4 sm:px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black">
+      {/* Background blobs — hidden on mobile for perf */}
+      <div className="hidden md:block absolute inset-0 opacity-20 -z-10">
         <motion.div
           animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -101,7 +101,7 @@ export default function FavouriteVideosGallery() {
           transition={{ duration: 0.8 }}
           className="mb-16 text-center"
         >
-          <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
+          <h2 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white mb-4">
             <div>GUIDING</div>
             <div className="bg-gradient-to-r from-slate-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
               MOMENTS
@@ -119,7 +119,7 @@ export default function FavouriteVideosGallery() {
         </motion.div>
 
         {/* Videos Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {videos.map((video, index) => (
             <motion.div
               key={video.id}

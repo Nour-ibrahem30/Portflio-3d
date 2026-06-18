@@ -1,36 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getCSSGradient, getGradient } from '../config/colorsConfig';
+import { getCSSGradient } from '../config/colorsConfig';
 
 export default function Navigation({ activeSection }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { id: 'home', label: 'Home', icon: '🏠' },
-    { id: 'about', label: 'About', icon: '👤' },
-    { id: 'skills', label: 'Skills', icon: '⚡' },
-    { id: 'projects', label: 'Projects', icon: '🚀' },
-    { id: 'experience', label: 'Experience', icon: '💼' },
-    { id: 'favourite-videos', label: 'Videos', icon: '🎬' },
-    { id: 'contact', label: 'Contact', icon: '📧' },
-  ];
-
-  const handleNavClick = (id) => {
+  const handleNavClick = useCallback((id) => {
     setIsOpen(false);
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const navItems = [
+    { id: 'home',             label: 'Home',       icon: '🏠' },
+    { id: 'about',            label: 'About',      icon: '👤' },
+    { id: 'skills',           label: 'Skills',     icon: '⚡' },
+    { id: 'projects',         label: 'Projects',   icon: '🚀' },
+    { id: 'experience',       label: 'Experience', icon: '💼' },
+    { id: 'favourite-videos', label: 'Videos',     icon: '🎬' },
+    { id: 'contact',          label: 'Contact',    icon: '📧' },
+  ];
 
   return (
     <>

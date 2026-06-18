@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,51 +7,71 @@ import { projectsConfig, getProjectOverride } from '../config/projectsConfig';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ── Session-level cache so we don't re-fetch on remount ──
+const CACHE_KEY = 'portfolio_projects_v2';
+const CACHE_TTL = 10 * 60 * 1000; // 10 min
+
+function getCached() {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) { sessionStorage.removeItem(CACHE_KEY); return null; }
+    return data;
+  } catch { return null; }
+}
+
+function setCache(data) {
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+// ── Rate-limited batch fetch (max 5 concurrent) ──
+async function batchFetch(items, fetcher, concurrency = 5) {
+  const results = [];
+  for (let i = 0; i < items.length; i += concurrency) {
+    const chunk = items.slice(i, i + concurrency);
+    const chunkResults = await Promise.all(chunk.map(fetcher));
+    results.push(...chunkResults);
+  }
+  return results;
+}
+
 export default function ProjectsSectionEnhanced() {
   const [allProjects, setAllProjects] = useState({ featured: [], other: [], archived: [] });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(projectsConfig.display.defaultTab);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [displayCount, setDisplayCount] = useState(projectsConfig.display.projectsPerPage);
+  const [techFilter, setTechFilter] = useState('All');
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
     const fetchProjects = async () => {
+      // ── Return cached data immediately if available ──
+      const cached = getCached();
+      if (cached) {
+        setAllProjects(cached);
+        setLoading(false);
+        return;
+      }
+
       try {
-        console.log('🔄 Starting to fetch projects...');
-        
         const headers = { 'Accept': 'application/vnd.github.v3+json' };
-        
         const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
-        if (githubToken) {
-          headers['Authorization'] = `token ${githubToken}`;
-          console.log('✅ GitHub token found');
-        } else {
-          console.log('⚠️ No GitHub token found - using public API (rate limited)');
-        }
-        
-        console.log('📡 Fetching repositories from GitHub...');
+        if (githubToken) headers['Authorization'] = `token ${githubToken}`;
+
         const reposResponse = await fetch(
           'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100',
           { headers }
         );
-        
-        console.log('📊 GitHub API Response Status:', reposResponse.status);
-        
-        if (!reposResponse.ok) {
-          const errorText = await reposResponse.text();
-          console.error('❌ GitHub API Error:', reposResponse.status, errorText);
-          throw new Error(`GitHub API error: ${reposResponse.status} - ${errorText}`);
-        }
-        
+
+        if (!reposResponse.ok) throw new Error(`GitHub API error: ${reposResponse.status}`);
+
         const repos = await reposResponse.json();
-        console.log('📦 Total repositories fetched:', repos.length);
-        
         const ownRepos = repos.filter(repo => !repo.fork);
-        console.log('🏠 Own repositories (non-forks):', ownRepos.length);
-        
+
         // Add local projects
         const localProjects = [];
         Object.keys(projectsConfig.overrides).forEach(projectName => {
@@ -73,14 +93,11 @@ export default function ProjectsSectionEnhanced() {
             });
           }
         });
-        
-        console.log('🏠 Local projects added:', localProjects.length);
-        
+
         const allRepos = [...localProjects, ...ownRepos];
         
-        // Fetch README and images for each repo
-        const projectsWithData = await Promise.all(
-          allRepos.map(async (repo) => {
+        // ── Batch fetch — max 5 concurrent to respect rate limits ──
+        const projectsWithData = await batchFetch(allRepos, async (repo) => {
             let description = repo.description || 'No description available';
             let projectImage = null;
             
@@ -205,28 +222,19 @@ export default function ProjectsSectionEnhanced() {
               readme: description,
               projectImage: projectImage
             };
-          })
-        );
-        
+        });
+
         // Apply overrides and organize
         const projectsWithOverrides = projectsWithData.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
-        
-        console.log('📋 Organized projects:', {
-          featured: organized.featured.length,
-          other: organized.other.length,
-          archived: organized.archived.length
-        });
-        
+
+        // ── Save to cache ──
+        setCache(organized);
+
         setAllProjects(organized);
         setLoading(false);
-        console.log('✅ Projects loaded successfully!');
       } catch (err) {
-        console.error('❌ Error fetching projects:', err);
-        console.error('📝 Error details:', err.message);
-        
-        // Fallback: show only local projects if GitHub fails
-        console.log('🔄 Falling back to local projects only...');
+        // Fallback to static data
         const localProjects = [];
         Object.keys(projectsConfig.overrides).forEach(projectName => {
           const override = projectsConfig.overrides[projectName];
@@ -511,6 +519,18 @@ export default function ProjectsSectionEnhanced() {
 
   const currentProjects = allProjects[activeTab] || [];
   const visibleProjects = currentProjects.slice(0, displayCount);
+  const filteredProjects = techFilter === 'All'
+    ? visibleProjects
+    : visibleProjects.filter(p => {
+        const tags = p.tags || [];
+        const lang = p.language || '';
+        if (techFilter === 'React') return tags.some(t => t.toLowerCase().includes('react')) || lang.toLowerCase() === 'javascriptreact';
+        if (techFilter === 'JavaScript') return tags.some(t => t.toLowerCase() === 'javascript') || lang.toLowerCase() === 'javascript';
+        if (techFilter === 'HTML/CSS') return tags.some(t => t.toLowerCase().includes('html') || t.toLowerCase().includes('css')) || lang.toLowerCase() === 'html' || lang.toLowerCase() === 'css';
+        if (techFilter === 'TypeScript') return tags.some(t => t.toLowerCase().includes('typescript')) || lang.toLowerCase() === 'typescript';
+        if (techFilter === 'WordPress') return tags.some(t => t.toLowerCase().includes('wordpress'));
+        return true;
+      });
 
   const tabs = [
     { id: 'featured', label: 'Featured', icon: '⭐', count: allProjects.featured.length },
@@ -521,9 +541,9 @@ export default function ProjectsSectionEnhanced() {
   ];
 
   return (
-    <section id="projects" ref={sectionRef} className="relative min-h-screen py-32 px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black w-full">
-      {/* Animated Background */}
-      <div className="absolute inset-0 opacity-20 -z-10">
+    <section id="projects" ref={sectionRef} className="relative min-h-screen py-20 md:py-32 px-4 sm:px-6 md:px-12 bg-gradient-to-b from-black via-zinc-950 to-black w-full">
+      {/* Background blobs — hidden on mobile */}
+      <div className="hidden md:block absolute inset-0 opacity-20 -z-10">
         <motion.div
           animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -544,7 +564,7 @@ export default function ProjectsSectionEnhanced() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-6xl md:text-8xl font-bold text-white mb-4">
+            <h2 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white mb-4">
               <div>SELECTED</div>
               <div className="bg-gradient-to-r from-slate-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
                 PROJECTS
@@ -580,6 +600,7 @@ export default function ProjectsSectionEnhanced() {
                   onClick={() => {
                     setActiveTab(tab.id);
                     setDisplayCount(projectsConfig.display.projectsPerPage);
+                    setTechFilter('All');
                   }}
                   className={`relative px-6 py-3 rounded-xl font-semibold uppercase tracking-wider text-sm transition-all duration-300 ${
                     activeTab === tab.id
@@ -615,6 +636,28 @@ export default function ProjectsSectionEnhanced() {
               </motion.li>
             ))}
           </ul>
+        </motion.div>
+
+        {/* Tech Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="flex flex-wrap gap-2 justify-center mb-10"
+        >
+          {['All', 'React', 'JavaScript', 'HTML/CSS', 'TypeScript', 'WordPress'].map((tech) => (
+            <button
+              key={tech}
+              onClick={() => setTechFilter(tech)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                techFilter === tech
+                  ? 'bg-zinc-700 text-white border border-zinc-500'
+                  : 'bg-zinc-900/50 text-gray-500 border border-zinc-800 hover:text-gray-300 hover:border-zinc-700'
+              }`}
+            >
+              {tech}
+            </button>
+          ))}
         </motion.div>
 
         {loading ? (
@@ -664,9 +707,9 @@ export default function ProjectsSectionEnhanced() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 auto-rows-fr"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 auto-rows-fr"
               >
-                {visibleProjects.map((project, index) => (
+                {filteredProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
                     project={project}
@@ -736,7 +779,7 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       onMouseEnter={() => setHoveredIndex(index)}
       onMouseLeave={() => setHoveredIndex(null)}
       whileHover={{ y: -10 }}
-      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl h-[500px] flex flex-col"
+      className="project-card group relative overflow-hidden bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-800 hover:border-slate-600/50 transition-all duration-300 shadow-xl min-h-[420px] sm:h-[500px] flex flex-col"
     >
       {/* NEW or FEATURED Badge */}
       {(isNew || isHighlighted) && (
