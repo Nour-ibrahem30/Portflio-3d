@@ -102,6 +102,8 @@ export default function ProjectsSectionEnhanced() {
         let reposResponse;
         let usingToken = false;
 
+        let repos = [];
+
         // Try authenticated request first if token is available
         if (githubToken) {
           try {
@@ -110,21 +112,40 @@ export default function ProjectsSectionEnhanced() {
               ...headers, 
               'Authorization': `token ${githubToken}` 
             };
-            // Use /user/repos to get both public and private repositories owned by the user
-            reposResponse = await fetch(
-              'https://api.github.com/user/repos?per_page=100&type=owner',
-              { headers: authHeaders }
-            );
+            
+            let page = 1;
+            const perPage = 100;
+            let hasMore = true;
+            let reposList = [];
 
-            if (reposResponse.ok) {
-              usingToken = true;
-              console.log('✅ Authenticated GitHub API fetch successful');
-            } else {
-              console.warn(`⚠️ Authenticated fetch failed (status ${reposResponse.status}). Falling back to unauthenticated public fetch...`);
-              if (reposResponse.status === 403 || reposResponse.status === 429) {
-                const reset = reposResponse.headers.get('x-ratelimit-reset');
-                setRateLimited(reset);
+            while (hasMore) {
+              reposResponse = await fetch(
+                `https://api.github.com/user/repos?per_page=${perPage}&page=${page}&type=owner`,
+                { headers: authHeaders }
+              );
+
+              if (reposResponse.ok) {
+                usingToken = true;
+                const pageRepos = await reposResponse.json();
+                reposList = [...reposList, ...pageRepos];
+                if (pageRepos.length < perPage) {
+                  hasMore = false;
+                } else {
+                  page++;
+                }
+              } else {
+                console.warn(`⚠️ Authenticated fetch failed (status ${reposResponse.status}). Falling back to unauthenticated public fetch...`);
+                if (reposResponse.status === 403 || reposResponse.status === 429) {
+                  const reset = reposResponse.headers.get('x-ratelimit-reset');
+                  setRateLimited(reset);
+                }
+                hasMore = false;
               }
+            }
+            
+            if (usingToken) {
+              repos = reposList;
+              console.log('✅ Authenticated GitHub API fetch successful');
             }
           } catch (tokenError) {
             console.warn('⚠️ Error during authenticated fetch:', tokenError.message);
@@ -142,21 +163,36 @@ export default function ProjectsSectionEnhanced() {
           if (headers['Authorization']) {
             delete headers['Authorization'];
           }
-          reposResponse = await fetch(
-            'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100',
-            { headers }
-          );
+          
+          let page = 1;
+          const perPage = 100;
+          let hasMore = true;
+          let reposList = [];
 
-          if (!reposResponse.ok) {
-            if (reposResponse.status === 403 || reposResponse.status === 429) {
-              const reset = reposResponse.headers.get('x-ratelimit-reset');
-              setRateLimited(reset);
+          while (hasMore) {
+            reposResponse = await fetch(
+              `https://api.github.com/users/Nour-ibrahem30/repos?per_page=${perPage}&page=${page}`,
+              { headers }
+            );
+
+            if (reposResponse.ok) {
+              const pageRepos = await reposResponse.json();
+              reposList = [...reposList, ...pageRepos];
+              if (pageRepos.length < perPage) {
+                hasMore = false;
+              } else {
+                page++;
+              }
+            } else {
+              if (reposResponse.status === 403 || reposResponse.status === 429) {
+                const reset = reposResponse.headers.get('x-ratelimit-reset');
+                setRateLimited(reset);
+              }
+              throw new Error(`GitHub API error: ${reposResponse.status}`);
             }
-            throw new Error(`GitHub API error: ${reposResponse.status}`);
           }
+          repos = reposList;
         }
-
-        const repos = await reposResponse.json();
         const ownRepos = repos.filter(repo => !repo.fork);
 
         // Add local projects
@@ -363,231 +399,497 @@ export default function ProjectsSectionEnhanced() {
         
         // Add static projects as fallback
         const staticFallbackProjects = [
-          {
-            id: 'portfolio-3d-fallback',
-            name: 'Portflio-3d',
-            full_name: 'Nour-ibrahem30/Portflio-3d',
-            description: 'Modern 3D portfolio website with interactive animations, built with React and Vite',
-            html_url: 'https://github.com/Nour-ibrahem30/Portflio-3d',
-            homepage: 'https://nour-ibrahem30.github.io/Portflio-3d/',
-            stargazers_count: 5, forks_count: 2, language: 'JavaScript',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/portfolio-3d.jpg',
-            readme: 'Modern 3D portfolio website with interactive animations, built with React, Vite, and Tailwind CSS.'
-          },
-          {
-            id: 'yly-reg-fallback',
-            name: 'YLY_Reg',
-            full_name: 'Nour-ibrahem30/YLY_Reg',
-            description: 'QR Code registration system for volunteers and events',
-            html_url: 'https://github.com/Nour-ibrahem30/YLY_Reg',
-            homepage: '',
-            stargazers_count: 2, forks_count: 0, language: 'JavaScript',
-            created_at: '2024-02-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/yly.jpg',
-            readme: 'QR Code registration system for managing volunteers and events.'
-          },
-          {
-            id: 'elgokh-fallback',
-            name: 'Elgokh',
-            full_name: 'Nour-ibrahem30/Elgokh',
-            description: 'Professional website project showcasing modern web development techniques',
-            html_url: 'https://github.com/Nour-ibrahem30/Elgokh',
-            homepage: '',
-            stargazers_count: 3, forks_count: 1, language: 'HTML',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/elgokh.jpg',
-            readme: 'Professional website project showcasing modern web development techniques and responsive design.'
-          },
-          {
-            id: 'creative-child-fallback',
-            name: 'Creative-child',
-            full_name: 'Nour-ibrahem30/Creative-child',
-            description: 'Creative and colorful website designed for children',
-            html_url: 'https://github.com/Nour-ibrahem30/Creative-child',
-            homepage: '',
-            stargazers_count: 2, forks_count: 0, language: 'CSS',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/creative-child.jpg',
-            readme: 'Creative and colorful website designed for children, featuring interactive elements and engaging UI.'
-          },
-          {
-            id: 'value-marketing-fallback',
-            name: 'intiative_Website_Value',
-            full_name: 'Nour-ibrahem30/intiative_Website_Value',
-            description: 'Custom React website built for Value Marketing company',
-            html_url: 'https://github.com/Nour-ibrahem30/intiative_Website_Value',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'React',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/value-marketing.jpg',
-            readme: 'Custom React website built for Value Marketing company. Features modern design, responsive layout, and smooth animations.'
-          },
-          {
-            id: 'sbs-fallback',
-            name: 'SBS-Website-Clone',
-            full_name: 'Nour-ibrahem30/SBS-Website-Clone',
-            description: 'Complete website for Shabab Betesaed Shabab organization',
-            html_url: 'https://github.com/Nour-ibrahem30/SBS-Website-Clone',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'React',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/sbs-website.jpg',
-            readme: 'Complete website for Shabab Betesaed Shabab organization. Built with React and TypeScript.'
-          },
-          {
-            id: 'green-studio-fallback',
-            name: 'Green-studio',
-            full_name: 'Nour-ibrahem30/Green-studio',
-            description: 'Elegant studio website with modern design and smooth animations',
-            html_url: 'https://github.com/Nour-ibrahem30/Green-studio',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/green-studio.jpg',
-            readme: 'Elegant studio website with modern design and smooth animations.'
-          },
-          {
-            id: 'vivadecor-fallback',
-            name: 'VivaDecor',
-            full_name: 'Nour-ibrahem30/VivaDecor',
-            description: 'Interior design showcase website',
-            html_url: 'https://github.com/Nour-ibrahem30/VivaDecor',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/viva-decor.jpg',
-            readme: 'Interior design showcase website built during Web Master internship.'
-          },
-          {
-            id: 'family-fallback',
-            name: 'Family',
-            full_name: 'Nour-ibrahem30/Family',
-            description: 'Family-oriented website project',
-            html_url: 'https://github.com/Nour-ibrahem30/Family',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2024-01-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            projectImage: '/Featured_Projects/family.jpg',
-            readme: 'Family-oriented website project with warm design and user-friendly interface.'
-          },
-        ];
+                {
+                          "id": "amrpro-fallback",
+                          "name": "AMRPro",
+                          "full_name": "Nour-ibrahem30/AMRPro",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/AMRPro",
+                          "homepage": "https://amr-pro.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2026-02-22T18:26:59Z",
+                          "updated_at": "2026-02-22T19:16:49Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "career-pilot-ai--fallback",
+                          "name": "Career-Pilot-AI-",
+                          "full_name": "Nour-ibrahem30/Career-Pilot-AI-",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Career-Pilot-AI-",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "TypeScript",
+                          "created_at": "2026-06-10T12:54:18Z",
+                          "updated_at": "2026-06-10T13:27:12Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "chain-app-fallback",
+                          "name": "Chain-App",
+                          "full_name": "Nour-ibrahem30/Chain-App",
+                          "description": "Html, css",
+                          "html_url": "https://github.com/Nour-ibrahem30/Chain-App",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-01-23T09:02:52Z",
+                          "updated_at": "2025-06-14T20:05:51Z",
+                          "default_branch": "main",
+                          "readme": "Html, css"
+                },
+                {
+                          "id": "creative-child-fallback",
+                          "name": "Creative-child",
+                          "full_name": "Nour-ibrahem30/Creative-child",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Creative-child",
+                          "homepage": "https://creative-child.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "JavaScript",
+                          "created_at": "2026-01-07T22:17:31Z",
+                          "updated_at": "2026-01-14T16:53:16Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/creative-child.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "cyborg-gaming-fallback",
+                          "name": "Cyborg-Gaming",
+                          "full_name": "Nour-ibrahem30/Cyborg-Gaming",
+                          "description": "Html, css Template",
+                          "html_url": "https://github.com/Nour-ibrahem30/Cyborg-Gaming",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-02-07T16:05:09Z",
+                          "updated_at": "2025-05-18T14:01:15Z",
+                          "default_branch": "main",
+                          "readme": "Html, css Template"
+                },
+                {
+                          "id": "e-commerce-fallback",
+                          "name": "E-Commerce",
+                          "full_name": "Nour-ibrahem30/E-Commerce",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/E-Commerce",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "SCSS",
+                          "created_at": "2025-09-01T18:16:11Z",
+                          "updated_at": "2025-09-09T17:30:27Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "elevate-academy-fallback",
+                          "name": "Elevate-Academy",
+                          "full_name": "Nour-ibrahem30/Elevate-Academy",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Elevate-Academy",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-06-26T13:07:17Z",
+                          "updated_at": "2025-06-26T13:12:14Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "elgokh-fallback",
+                          "name": "Elgokh",
+                          "full_name": "Nour-ibrahem30/Elgokh",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Elgokh",
+                          "homepage": "https://fdk2.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2026-01-31T14:13:23Z",
+                          "updated_at": "2026-03-01T13:59:22Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/elgokh.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "family-fallback",
+                          "name": "Family",
+                          "full_name": "Nour-ibrahem30/Family",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Family",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-09-23T09:14:08Z",
+                          "updated_at": "2026-02-08T22:52:03Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/family.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "guess-the-words-fallback",
+                          "name": "Guess-the-words",
+                          "full_name": "Nour-ibrahem30/Guess-the-words",
+                          "description": "A light word guessing game based on thinking and intelligence, specially designed for simplicity and interactive use using HTML, CSS and JavaScript.",
+                          "html_url": "https://github.com/Nour-ibrahem30/Guess-the-words",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "JavaScript",
+                          "created_at": "2025-06-04T17:29:29Z",
+                          "updated_at": "2025-06-05T17:19:17Z",
+                          "default_branch": "main",
+                          "readme": "A light word guessing game based on thinking and intelligence, specially designed for simplicity and interactive use using HTML, CSS and JavaScript."
+                },
+                {
+                          "id": "hangman-fallback",
+                          "name": "Hangman",
+                          "full_name": "Nour-ibrahem30/Hangman",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Hangman",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-06-07T09:09:03Z",
+                          "updated_at": "2025-06-07T09:18:40Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "intiative_website_value-fallback",
+                          "name": "intiative_Website_Value",
+                          "full_name": "Nour-ibrahem30/intiative_Website_Value",
+                          "description": "Vakue intiative Website",
+                          "html_url": "https://github.com/Nour-ibrahem30/intiative_Website_Value",
+                          "homepage": "https://intiative-website-value.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-12-18T15:58:14Z",
+                          "updated_at": "2026-02-08T22:44:41Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/value-marketing.jpg",
+                          "readme": "Vakue intiative Website"
+                },
+                {
+                          "id": "jadoo-fallback",
+                          "name": "jadoo",
+                          "full_name": "Nour-ibrahem30/jadoo",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/jadoo",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-07-10T16:12:24Z",
+                          "updated_at": "2025-07-10T16:22:01Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "kalaly-project-fallback",
+                          "name": "Kalaly-Project",
+                          "full_name": "Nour-ibrahem30/Kalaly-Project",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Kalaly-Project",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-07-27T17:20:10Z",
+                          "updated_at": "2025-07-27T17:29:12Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "kasper-fallback",
+                          "name": "Kasper",
+                          "full_name": "Nour-ibrahem30/Kasper",
+                          "description": "Html, css",
+                          "html_url": "https://github.com/Nour-ibrahem30/Kasper",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-01-12T08:12:35Z",
+                          "updated_at": "2025-01-12T08:20:04Z",
+                          "default_branch": "main",
+                          "readme": "Html, css"
+                },
+                {
+                          "id": "leon-fallback",
+                          "name": "Leon",
+                          "full_name": "Nour-ibrahem30/Leon",
+                          "description": "Html, css",
+                          "html_url": "https://github.com/Nour-ibrahem30/Leon",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-01-12T08:22:29Z",
+                          "updated_at": "2025-01-12T08:24:41Z",
+                          "default_branch": "main",
+                          "readme": "Html, css"
+                },
+                {
+                          "id": "liberty-market-fallback",
+                          "name": "Liberty-Market",
+                          "full_name": "Nour-ibrahem30/Liberty-Market",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Liberty-Market",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-03-26T14:37:07Z",
+                          "updated_at": "2025-03-26T14:40:09Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "login-register-system-fallback",
+                          "name": "Login-Register-System",
+                          "full_name": "Nour-ibrahem30/Login-Register-System",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Login-Register-System",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-08-04T21:00:05Z",
+                          "updated_at": "2026-02-09T10:20:31Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "memory-game-fallback",
+                          "name": "Memory-Game",
+                          "full_name": "Nour-ibrahem30/Memory-Game",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Memory-Game",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-06-24T15:15:22Z",
+                          "updated_at": "2025-06-24T16:02:28Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "movie-app-fallback",
+                          "name": "Movie-App",
+                          "full_name": "Nour-ibrahem30/Movie-App",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Movie-App",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-08-08T14:53:49Z",
+                          "updated_at": "2025-08-08T15:12:13Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "new-portfolio-fallback",
+                          "name": "New-Portfolio",
+                          "full_name": "Nour-ibrahem30/New-Portfolio",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/New-Portfolio",
+                          "homepage": "https://new-portfolio-two-ashen.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-10-20T15:47:27Z",
+                          "updated_at": "2025-12-20T19:35:49Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "nour-ibrahem30-fallback",
+                          "name": "Nour-ibrahem30",
+                          "full_name": "Nour-ibrahem30/Nour-ibrahem30",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Nour-ibrahem30",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-07-15T20:05:00Z",
+                          "updated_at": "2025-09-02T07:56:35Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "portflio-3d-fallback",
+                          "name": "Portflio-3d",
+                          "full_name": "Nour-ibrahem30/Portflio-3d",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Portflio-3d",
+                          "homepage": "https://nouribrahem.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "JavaScript",
+                          "created_at": "2026-02-08T17:17:27Z",
+                          "updated_at": "2026-06-20T21:44:15Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/portfolio-3d.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "quiz-app-fallback",
+                          "name": "Quiz-App",
+                          "full_name": "Nour-ibrahem30/Quiz-App",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Quiz-App",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-06-09T14:26:25Z",
+                          "updated_at": "2025-06-10T15:42:33Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "sbs-website-clone-fallback",
+                          "name": "SBS-Website-Clone",
+                          "full_name": "Nour-ibrahem30/SBS-Website-Clone",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/SBS-Website-Clone",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-10-23T22:24:50Z",
+                          "updated_at": "2026-02-09T10:15:18Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/sbs-website.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "sbs_game-fallback",
+                          "name": "SBS_Game",
+                          "full_name": "Nour-ibrahem30/SBS_Game",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/SBS_Game",
+                          "homepage": "https://sbs-game-three.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "JavaScript",
+                          "created_at": "2026-03-05T18:52:37Z",
+                          "updated_at": "2026-03-05T18:56:29Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "sun-system-fallback",
+                          "name": "Sun-System",
+                          "full_name": "Nour-ibrahem30/Sun-System",
+                          "description": "Html, css",
+                          "html_url": "https://github.com/Nour-ibrahem30/Sun-System",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2025-04-18T23:37:59Z",
+                          "updated_at": "2025-05-18T14:01:59Z",
+                          "default_branch": "main",
+                          "readme": "Html, css"
+                },
+                {
+                          "id": "toy-studio-fallback",
+                          "name": "Toy-Studio",
+                          "full_name": "Nour-ibrahem30/Toy-Studio",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Toy-Studio",
+                          "homepage": "https://toy-studio.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2026-02-11T14:52:50Z",
+                          "updated_at": "2026-02-11T16:25:16Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "travel-fallback",
+                          "name": "Travel",
+                          "full_name": "Nour-ibrahem30/Travel",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/Travel",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-08-24T11:55:32Z",
+                          "updated_at": "2026-02-09T10:18:25Z",
+                          "default_branch": "main",
+                          "readme": ""
+                },
+                {
+                          "id": "vivadecor-fallback",
+                          "name": "VivaDecor",
+                          "full_name": "Nour-ibrahem30/VivaDecor",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/VivaDecor",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "HTML",
+                          "created_at": "2025-08-02T07:53:08Z",
+                          "updated_at": "2025-08-02T15:29:14Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/viva-decor.jpg",
+                          "readme": ""
+                },
+                {
+                          "id": "web-master-fallback",
+                          "name": "web-master",
+                          "full_name": "Nour-ibrahem30/web-master",
+                          "description": "Html , css template-one",
+                          "html_url": "https://github.com/Nour-ibrahem30/web-master",
+                          "homepage": "",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "CSS",
+                          "created_at": "2024-11-22T18:48:44Z",
+                          "updated_at": "2025-01-10T03:15:18Z",
+                          "default_branch": "main",
+                          "readme": "Html , css template-one"
+                },
+                {
+                          "id": "yly_reg-fallback",
+                          "name": "YLY_Reg",
+                          "full_name": "Nour-ibrahem30/YLY_Reg",
+                          "description": "",
+                          "html_url": "https://github.com/Nour-ibrahem30/YLY_Reg",
+                          "homepage": "https://yly-reg.vercel.app",
+                          "stargazers_count": 0,
+                          "forks_count": 0,
+                          "language": "JavaScript",
+                          "created_at": "2026-02-26T23:01:28Z",
+                          "updated_at": "2026-03-17T18:37:16Z",
+                          "default_branch": "main",
+                          "projectImage": "/Featured_Projects/yly.jpg",
+                          "readme": ""
+                }
+      ];
         
-        // Add other projects to fallback
-        const otherFallbackProjects = [
-          {
-            id: 'jadoo-fallback',
-            name: 'jadoo',
-            full_name: 'Nour-ibrahem30/jadoo',
-            description: 'Travel booking website built during Web Master internship',
-            html_url: 'https://github.com/Nour-ibrahem30/jadoo',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Travel booking website built during Web Master internship. Features responsive design and interactive UI.'
-          },
-          {
-            id: 'kalaly-fallback',
-            name: 'Kalaly-Project',
-            full_name: 'Nour-ibrahem30/Kalaly-Project',
-            description: 'E-commerce project built during Web Master internship',
-            html_url: 'https://github.com/Nour-ibrahem30/Kalaly-Project',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'E-commerce project built during Web Master internship. Includes product listings and shopping cart functionality.'
-          },
-          {
-            id: 'travel-fallback',
-            name: 'Travel',
-            full_name: 'Nour-ibrahem30/Travel',
-            description: 'Tourism website built during Web Master internship',
-            html_url: 'https://github.com/Nour-ibrahem30/Travel',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-06-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Tourism website built during Web Master internship. Includes destination listings and booking features.'
-          },
-          {
-            id: 'quiz-fallback',
-            name: 'Quiz-App',
-            full_name: 'Nour-ibrahem30/Quiz-App',
-            description: 'Interactive quiz application',
-            html_url: 'https://github.com/Nour-ibrahem30/Quiz-App',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
-            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Interactive quiz application with multiple choice questions and score tracking.'
-          },
-          {
-            id: 'memory-fallback',
-            name: 'Memory-Game',
-            full_name: 'Nour-ibrahem30/Memory-Game',
-            description: 'Memory card matching game',
-            html_url: 'https://github.com/Nour-ibrahem30/Memory-Game',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
-            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Memory card matching game with different difficulty levels.'
-          },
-          {
-            id: 'hangman-fallback',
-            name: 'Hangman',
-            full_name: 'Nour-ibrahem30/Hangman',
-            description: 'Classic Hangman word guessing game',
-            html_url: 'https://github.com/Nour-ibrahem30/Hangman',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
-            created_at: '2023-05-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Classic Hangman word guessing game with multiple categories.'
-          },
-          {
-            id: 'ecommerce-fallback',
-            name: 'E-Commerce',
-            full_name: 'Nour-ibrahem30/E-Commerce',
-            description: 'E-commerce website with shopping cart',
-            html_url: 'https://github.com/Nour-ibrahem30/E-Commerce',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'JavaScript',
-            created_at: '2023-04-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'E-commerce website with product catalog and shopping cart functionality.'
-          },
-          {
-            id: 'kasper-fallback',
-            name: 'Kasper',
-            full_name: 'Nour-ibrahem30/Kasper',
-            description: 'Modern landing page template',
-            html_url: 'https://github.com/Nour-ibrahem30/Kasper',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Modern landing page template with clean design.'
-          },
-          {
-            id: 'leon-fallback',
-            name: 'Leon',
-            full_name: 'Nour-ibrahem30/Leon',
-            description: 'Minimal agency template',
-            html_url: 'https://github.com/Nour-ibrahem30/Leon',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-03-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Minimal agency template with responsive design.'
-          },
-          {
-            id: 'cyborg-fallback',
-            name: 'Cyborg-Gaming',
-            full_name: 'Nour-ibrahem30/Cyborg-Gaming',
-            description: 'Gaming website template',
-            html_url: 'https://github.com/Nour-ibrahem30/Cyborg-Gaming',
-            homepage: '',
-            stargazers_count: 1, forks_count: 0, language: 'HTML',
-            created_at: '2023-02-01T00:00:00Z', updated_at: new Date().toISOString(), default_branch: 'main',
-            readme: 'Gaming website template with modern design.'
-          },
-        ];
-        
-        const fallbackProjects = [...localProjects, ...staticFallbackProjects, ...otherFallbackProjects];
+        const fallbackProjects = [...localProjects, ...staticFallbackProjects];
         const projectsWithOverrides = fallbackProjects.map(applyProjectOverrides);
         const organized = organizeProjects(projectsWithOverrides);
         
