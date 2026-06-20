@@ -60,14 +60,50 @@ export default function ProjectsSectionEnhanced() {
       try {
         const headers = { 'Accept': 'application/vnd.github.v3+json' };
         const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
-        if (githubToken) headers['Authorization'] = `token ${githubToken}`;
+        
+        let reposResponse;
+        let usingToken = false;
 
-        const reposResponse = await fetch(
-          'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100',
-          { headers }
-        );
+        // Try authenticated request first if token is available
+        if (githubToken) {
+          try {
+            console.log('📡 Attempting authenticated GitHub API fetch...');
+            const authHeaders = { 
+              ...headers, 
+              'Authorization': `token ${githubToken}` 
+            };
+            // Use /user/repos to get both public and private repositories owned by the user
+            reposResponse = await fetch(
+              'https://api.github.com/user/repos?per_page=100&type=owner',
+              { headers: authHeaders }
+            );
 
-        if (!reposResponse.ok) throw new Error(`GitHub API error: ${reposResponse.status}`);
+            if (reposResponse.ok) {
+              usingToken = true;
+              console.log('✅ Authenticated GitHub API fetch successful');
+            } else {
+              console.warn(`⚠️ Authenticated fetch failed (status ${reposResponse.status}). Falling back to unauthenticated public fetch...`);
+            }
+          } catch (tokenError) {
+            console.warn('⚠️ Error during authenticated fetch:', tokenError.message);
+          }
+        }
+
+        // If no token or authenticated request failed, fall back to public endpoints without token
+        if (!usingToken) {
+          console.log('📡 Fetching public repositories from GitHub...');
+          if (headers['Authorization']) {
+            delete headers['Authorization'];
+          }
+          reposResponse = await fetch(
+            'https://api.github.com/users/Nour-ibrahem30/repos?per_page=100',
+            { headers }
+          );
+
+          if (!reposResponse.ok) {
+            throw new Error(`GitHub API error: ${reposResponse.status}`);
+          }
+        }
 
         const repos = await reposResponse.json();
         const ownRepos = repos.filter(repo => !repo.fork);
@@ -518,10 +554,9 @@ export default function ProjectsSectionEnhanced() {
   }, [isInView]);
 
   const currentProjects = allProjects[activeTab] || [];
-  const visibleProjects = currentProjects.slice(0, displayCount);
   const filteredProjects = techFilter === 'All'
-    ? visibleProjects
-    : visibleProjects.filter(p => {
+    ? currentProjects
+    : currentProjects.filter(p => {
         const tags = p.tags || [];
         const lang = p.language || '';
         if (techFilter === 'React') return tags.some(t => t.toLowerCase().includes('react')) || lang.toLowerCase() === 'javascriptreact';
@@ -531,6 +566,7 @@ export default function ProjectsSectionEnhanced() {
         if (techFilter === 'WordPress') return tags.some(t => t.toLowerCase().includes('wordpress'));
         return true;
       });
+  const visibleProjects = filteredProjects.slice(0, displayCount);
 
   const tabs = [
     { id: 'featured', label: 'Featured', icon: '⭐', count: allProjects.featured.length },
@@ -695,7 +731,7 @@ export default function ProjectsSectionEnhanced() {
               className="text-center mb-12"
             >
               <p className="text-gray-400 text-lg">
-                Showing <span className="text-cyan-400 font-bold">{Math.min(displayCount, currentProjects.length)}</span> of <span className="text-cyan-400 font-bold">{currentProjects.length}</span> projects
+                Showing <span className="text-cyan-400 font-bold">{Math.min(displayCount, filteredProjects.length)}</span> of <span className="text-cyan-400 font-bold">{filteredProjects.length}</span> projects
               </p>
             </motion.div>
 
@@ -709,7 +745,7 @@ export default function ProjectsSectionEnhanced() {
                 transition={{ duration: 0.3 }}
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 auto-rows-fr"
               >
-                {filteredProjects.map((project, index) => (
+                {visibleProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
                     project={project}
@@ -723,7 +759,7 @@ export default function ProjectsSectionEnhanced() {
             </AnimatePresence>
 
             {/* Load More Button */}
-            {displayCount < currentProjects.length && (
+            {displayCount < filteredProjects.length && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -732,11 +768,11 @@ export default function ProjectsSectionEnhanced() {
               >
                 {/* Remaining count */}
                 <p className="text-gray-500 text-sm">
-                  <span className="text-cyan-400 font-bold">{currentProjects.length - displayCount}</span> more projects remaining
+                  <span className="text-cyan-400 font-bold">{filteredProjects.length - displayCount}</span> more projects remaining
                 </p>
 
                 <motion.button
-                  onClick={() => setDisplayCount(prev => Math.min(prev + 6, currentProjects.length))}
+                  onClick={() => setDisplayCount(prev => Math.min(prev + 6, filteredProjects.length))}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="group relative px-10 py-4 overflow-hidden rounded-full"
