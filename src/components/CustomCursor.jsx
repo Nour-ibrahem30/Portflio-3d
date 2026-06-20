@@ -5,7 +5,6 @@ export default function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
   const [isVisible,  setIsVisible]  = useState(false);
-  const [isDesktop,  setIsDesktop]  = useState(false);
 
   // Ring — slow/lagging follower
   const ringX = useMotionValue(-200);
@@ -20,10 +19,6 @@ export default function CustomCursor() {
   const smoothDotY = useSpring(dotY, { stiffness: 600, damping: 30 });
 
   useEffect(() => {
-    // Only activate on desktop
-    if (window.innerWidth < 1024) return;
-    setIsDesktop(true);
-
     const onMove = (e) => {
       setIsVisible(true);
       ringX.set(e.clientX - 20);
@@ -53,14 +48,11 @@ export default function CustomCursor() {
     };
   }, [ringX, ringY, dotX, dotY]);
 
-  // Don't render on mobile — all hooks already called above (Rules of Hooks safe)
-  if (!isDesktop) return null;
-
   return (
     <>
       {/* ── Outer Ring ── */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[99998]"
+        className="fixed top-0 left-0 pointer-events-none z-[100000] hidden lg:block"
         style={{ x: smoothRingX, y: smoothRingY }}
         animate={{
           width:   isHovering ? 52 : isClicking ? 28 : 40,
@@ -97,7 +89,7 @@ export default function CustomCursor() {
 
       {/* ── Center Dot ── */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 pointer-events-none z-[99999]"
+        className="fixed top-0 left-0 w-2 h-2 pointer-events-none z-[100001] hidden lg:block"
         style={{ x: smoothDotX, y: smoothDotY }}
         animate={{
           scale:   isClicking ? 0.5 : isHovering ? 0 : 1,
