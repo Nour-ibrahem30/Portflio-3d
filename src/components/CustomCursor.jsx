@@ -90,7 +90,7 @@ export default function CustomCursor() {
         {/* Inner fill on hover */}
         <motion.div
           className="absolute inset-2 rounded-full"
-          animate={{ background: isHovering ? 'rgba(34,211,238,0.08)' : 'transparent' }}
+          animate={{ backgroundColor: isHovering ? 'rgba(34, 211, 238, 0.08)' : 'rgba(34, 211, 238, 0)' }}
           transition={{ duration: 0.2 }}
         />
       </motion.div>

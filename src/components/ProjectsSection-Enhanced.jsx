@@ -7,22 +7,45 @@ import { projectsConfig, getProjectOverride } from '../config/projectsConfig';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ── Session-level cache so we don't re-fetch on remount ──
-const CACHE_KEY = 'portfolio_projects_v2';
-const CACHE_TTL = 10 * 60 * 1000; // 10 min
+// ── LocalStorage cache so we don't hit GitHub's unauthenticated rate limits ──
+const CACHE_KEY = 'portfolio_projects_v3';
+const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+const RATE_LIMIT_KEY = 'github_api_rate_limited';
+const RATE_LIMIT_COOLDOWN = 15 * 60 * 1000; // 15 mins default cooldown
 
 function getCached() {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts > CACHE_TTL) { sessionStorage.removeItem(CACHE_KEY); return null; }
-    return data;
+    return { data, age: Date.now() - ts };
   } catch { return null; }
 }
 
 function setCache(data) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
+
+function checkRateLimited() {
+  try {
+    const limitTime = localStorage.getItem(RATE_LIMIT_KEY);
+    if (!limitTime) return false;
+    if (Date.now() > parseInt(limitTime, 10)) {
+      localStorage.removeItem(RATE_LIMIT_KEY);
+      return false;
+    }
+    return true;
+  } catch { return false; }
+}
+
+function setRateLimited(resetTimestamp) {
+  try {
+    // If GitHub provides a reset timestamp in headers, use it; otherwise default to 15 min cooldown
+    const resetTime = resetTimestamp 
+      ? parseInt(resetTimestamp, 10) * 1000 
+      : Date.now() + RATE_LIMIT_COOLDOWN;
+    localStorage.setItem(RATE_LIMIT_KEY, resetTime.toString());
+  } catch {}
 }
 
 // ── Rate-limited batch fetch (max 5 concurrent) ──
@@ -49,12 +72,27 @@ export default function ProjectsSectionEnhanced() {
 
   useEffect(() => {
     const fetchProjects = async () => {
-      // ── Return cached data immediately if available ──
+      // 1. Check if we are currently rate-limited (to avoid 403 network errors in console)
+      const isRateLimited = checkRateLimited();
+      
+      // 2. Try to get cached data
       const cached = getCached();
+      
+      // 3. Decide whether we can use cache immediately
       if (cached) {
-        setAllProjects(cached);
-        setLoading(false);
-        return;
+        const isFresh = cached.age < CACHE_TTL;
+        if (isRateLimited || isFresh) {
+          console.log(isRateLimited 
+            ? '🚀 GitHub API rate limit active, using cached portfolio data' 
+            : '🚀 Using fresh cached portfolio data'
+          );
+          setAllProjects(cached.data);
+          setLoading(false);
+          return;
+        }
+      } else if (isRateLimited) {
+        console.warn('⚠️ GitHub API rate limit active and no cached data available. Falling back to static data.');
+        throw new Error('GitHub API rate limited (cooldown active)');
       }
 
       try {
@@ -83,6 +121,10 @@ export default function ProjectsSectionEnhanced() {
               console.log('✅ Authenticated GitHub API fetch successful');
             } else {
               console.warn(`⚠️ Authenticated fetch failed (status ${reposResponse.status}). Falling back to unauthenticated public fetch...`);
+              if (reposResponse.status === 403 || reposResponse.status === 429) {
+                const reset = reposResponse.headers.get('x-ratelimit-reset');
+                setRateLimited(reset);
+              }
             }
           } catch (tokenError) {
             console.warn('⚠️ Error during authenticated fetch:', tokenError.message);
@@ -91,6 +133,11 @@ export default function ProjectsSectionEnhanced() {
 
         // If no token or authenticated request failed, fall back to public endpoints without token
         if (!usingToken) {
+          // Double check rate limit flag before public fetch
+          if (checkRateLimited()) {
+            throw new Error('Skipping public fetch: Rate limit cooldown active');
+          }
+
           console.log('📡 Fetching public repositories from GitHub...');
           if (headers['Authorization']) {
             delete headers['Authorization'];
@@ -101,6 +148,10 @@ export default function ProjectsSectionEnhanced() {
           );
 
           if (!reposResponse.ok) {
+            if (reposResponse.status === 403 || reposResponse.status === 429) {
+              const reset = reposResponse.headers.get('x-ratelimit-reset');
+              setRateLimited(reset);
+            }
             throw new Error(`GitHub API error: ${reposResponse.status}`);
           }
         }
@@ -158,6 +209,19 @@ export default function ProjectsSectionEnhanced() {
               description = override.customDescription || description;
               console.log(`📸 Using local image for ${repo.name}:`, projectImage);
               
+              return {
+                ...repo,
+                readme: description,
+                projectImage: projectImage
+              };
+            }
+
+            // Skip readme fetch if we just got rate-limited by a previous fetch
+            if (checkRateLimited()) {
+              const isFeatured = projectsConfig.featured.includes(repo.name);
+              projectImage = isFeatured 
+                ? `https://opengraph.githubassets.com/1/${repo.full_name}`
+                : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 800 600%27%3E%3Cdefs%3E%3ClinearGradient id=%27grad%27 x1=%270%25%27 y1=%270%25%27 x2=%270%25%27 y2=%27100%25%27%3E%3Cstop offset=%270%25%27 style=%27stop-color:%231e293b;stop-opacity:1%27 /%3E%3Cstop offset=%27100%25%27 style=%27stop-color:%230f172a;stop-opacity:1%27 /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27800%27 height=%27600%27 fill=%27url(%23grad)%27/%3E%3Cg transform=%27translate(400,300)%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%27120%27 fill=%27%23cbd5e1%27 opacity=%270.1%27/%3E%3Cpath d=%27M-40,-20 L-40,20 L0,40 L40,20 L40,-20 L0,-40 Z%27 fill=%27%23cbd5e1%27 opacity=%270.8%27/%3E%3Ccircle cx=%270%27 cy=%27-10%27 r=%2715%27 fill=%27%23475569%27/%3E%3Cpath d=%27M-25,10 Q0,30 25,10%27 stroke=%27%23475569%27 stroke-width=%273%27 fill=%27none%27/%3E%3C/g%3E%3Ctext x=%27400%27 y=%27480%27 font-family=%27Arial,sans-serif%27 font-size=%2724%27 fill=%27%2364748b%27 text-anchor=%27middle%27%3EJAVASCRIPT%3C/text%3E%3C/svg%3E';
               return {
                 ...repo,
                 readme: description,
@@ -226,6 +290,11 @@ export default function ProjectsSectionEnhanced() {
                 } else if (directImages.length > 0) {
                   // Use first direct image URL found
                   projectImage = directImages[0][1];
+                }
+              } else {
+                if (readmeResponse.status === 403 || readmeResponse.status === 429) {
+                  const reset = readmeResponse.headers.get('x-ratelimit-reset');
+                  setRateLimited(reset);
                 }
               }
               
