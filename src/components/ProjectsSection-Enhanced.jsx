@@ -1173,10 +1173,29 @@ export default function ProjectsSectionEnhanced() {
   );
 }
 
+// ── Check if a live URL is reachable ──
+function useLiveUrlCheck(url) {
+  const [status, setStatus] = useState('checking'); // 'checking' | 'alive' | 'dead'
+
+  useEffect(() => {
+    if (!url || url === '#') { setStatus('dead'); return; }
+    let cancelled = false;
+    // Use a no-cors fetch — if it doesn't throw, the server responded
+    fetch(url, { method: 'HEAD', mode: 'no-cors', cache: 'no-store' })
+      .then(() => { if (!cancelled) setStatus('alive'); })
+      .catch(() => { if (!cancelled) setStatus('dead'); });
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return status;
+}
+
 // Project Card Component
 function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }) {
   const isNew = isNewProject(project);
   const isHighlighted = project.isHighlighted;
+  const liveUrl = project.liveUrl || project.homepage || '';
+  const liveStatus = useLiveUrlCheck(liveUrl || null);
 
   return (
     <motion.div
@@ -1311,26 +1330,89 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
             </motion.span>
           </div>
 
-          {/* View Project Button - Consistent styling */}
-          <motion.div
-            className="relative overflow-hidden rounded-xl"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="relative px-6 py-3 border-2 text-center font-semibold text-sm transition-all duration-300 rounded-xl" style={{
-              background: hoveredIndex === index ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%)' : 'rgba(24, 24, 27, 0.5)',
-              borderColor: hoveredIndex === index ? 'rgba(59, 130, 246, 0.5)' : 'rgba(63, 63, 70, 0.3)',
-              color: hoveredIndex === index ? '#60a5fa' : '#9ca3af',
-              backdropFilter: 'blur(8px)'
-            }}>
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                View Project
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          {/* Buttons Row */}
+          <div className="flex gap-2 relative z-20">
+            {/* GitHub Button */}
+            <motion.a
+              href={project.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 relative overflow-hidden rounded-xl"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative px-4 py-3 border-2 text-center font-semibold text-sm transition-all duration-300 rounded-xl flex items-center justify-center gap-2" style={{
+                background: hoveredIndex === index ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(56, 189, 248, 0.15) 100%)' : 'rgba(24, 24, 27, 0.5)',
+                borderColor: hoveredIndex === index ? 'rgba(59, 130, 246, 0.5)' : 'rgba(63, 63, 70, 0.3)',
+                color: hoveredIndex === index ? '#60a5fa' : '#9ca3af',
+                backdropFilter: 'blur(8px)'
+              }}>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                 </svg>
-              </span>
-            </div>
-          </motion.div>
+                GitHub
+              </div>
+            </motion.a>
+
+            {/* Live View Button - only if homepage or liveUrl exists */}
+            {liveUrl && liveUrl !== '#' && (
+              liveStatus === 'alive' ? (
+                <motion.a
+                  href={liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 relative overflow-hidden rounded-xl"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="relative px-4 py-3 text-center font-semibold text-sm transition-all duration-300 rounded-xl flex items-center justify-center gap-2" style={{
+                    background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+                    color: '#ffffff',
+                  }}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Live View
+                  </div>
+                </motion.a>
+              ) : liveStatus === 'dead' ? (
+                <div
+                  className="flex-1 relative overflow-hidden rounded-xl cursor-not-allowed"
+                  title="Live site is currently unavailable"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="relative px-4 py-3 text-center font-semibold text-sm rounded-xl flex items-center justify-center gap-2" style={{
+                    background: 'rgba(24,24,27,0.5)',
+                    border: '1px solid rgba(63,63,70,0.3)',
+                    color: '#52525b',
+                  }}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    Offline
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="flex-1 relative overflow-hidden rounded-xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="relative px-4 py-3 text-center font-semibold text-sm rounded-xl flex items-center justify-center gap-2" style={{
+                    background: 'rgba(24,24,27,0.5)',
+                    border: '1px solid rgba(63,63,70,0.3)',
+                    color: '#52525b',
+                  }}>
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Checking...
+                  </div>
+                </div>
+              )
+            )}
+          </div>
         </div>
       </div>
 
@@ -1350,11 +1432,12 @@ function ProjectCard({ project, index, isInView, hoveredIndex, setHoveredIndex }
       </div>
 
       <a
-        href={project.liveUrl || project.html_url}
+        href={project.html_url}
         target="_blank"
         rel="noopener noreferrer"
         className="absolute inset-0"
-        aria-label={`View ${project.displayName || project.name}`}
+        aria-label={`View ${project.displayName || project.name} on GitHub`}
+        style={{ zIndex: 1 }}
       />
     </motion.div>
   );
