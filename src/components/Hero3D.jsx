@@ -444,7 +444,7 @@ export default function Hero3D() {
           </motion.a>
 
           <motion.a
-            href="/Nour_Ibrahem_CV.pdf"
+            href="/Reusme/Cv..pdf"
             download
             className="hero-cta group relative px-8 py-4 bg-zinc-900/50 border border-zinc-700/50 rounded-full backdrop-blur-sm overflow-hidden"
             whileHover={{ scale: 1.05 }}
